@@ -3,14 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Projects</title>
+  <title>Color Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>My Projects</h1>
-  <div id="projects">
-    <!-- project cards go here -->
-  </div>
+  <main>
+    <h1>Color Game</h1>
+
+    <div id="swatch"></div>
+    <p id="info">Press Start</p>
+
+    <div id="sliders">
+      <label>Hue: <span id="hueVal">0</span>
+        <input type="range" id="hue" min="0" max="360" value="0">
+      </label>
+      <label>Saturation: <span id="satVal">50</span>
+        <input type="range" id="sat" min="0" max="100" value="50">
+      </label>
+      <label>Brightness: <span id="briVal">50</span>
+        <input type="range" id="bri" min="0" max="100" value="50">
+      </label>
+    </div>
+
+    <button id="button">Start</button>
+  </main>
+
   <script src="script.js"></script>
 </body>
 </html>
