@@ -135,7 +135,7 @@ function submit() {
   info.textContent = round < ROUNDS
     ? `Score: ${score}  |  Total: ${total}`
     : `Final score: ${total} / ${ROUNDS * 100}`;
-  button.textContent = round < ROUNDS ? "next round" : "play again";
+  button.textContent = round < ROUNDS ? "una una" : "play again";
   button.onclick = startRound;
 }
 

@@ -140,7 +140,7 @@ body {
   background:
     radial-gradient(ellipse at 12% 14%, rgba(255, 255, 255, 0.9), transparent 34%),
     radial-gradient(ellipse at 92% 12%, rgba(255, 191, 207, 0.72), transparent 33%),
-    radial-gradient(ellipse at 82% 94%, rgba(145, 224, 203, 0.7), transparent 34%),
+    radial-gradient(ellipse at 82% 94%, rgba(133, 214, 193, 0.7), transparent 34%),
     linear-gradient(135deg, #fff1e5 0%, #ffe5ed 48%, #eaf5e8 100%);
 }
 
@@ -797,16 +797,6 @@ body::before {
   letter-spacing: 0;
 }
 
-.title-usagi {
-  width: 1.65em;
-  height: 1.65em;
-  padding: 4px;
-  border: 1px solid rgba(48, 57, 67, 0.12);
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(56, 65, 76, 0.1);
-}
-
 .game-panel {
   border: 1px solid rgba(43, 50, 59, 0.1);
   border-radius: 10px;
@@ -995,11 +985,6 @@ body::before {
     font-size: 25px;
   }
 
-  .title-usagi {
-    width: 1.5em;
-    height: 1.5em;
-  }
-
   .game-panel {
     border-radius: 8px;
   }
@@ -1071,14 +1056,6 @@ body::before {
   text-align: center;
 }
 
-.title-usagi {
-  display: inline-block;
-  width: 1.9em;
-  height: 1.9em;
-  object-fit: contain;
-  vertical-align: middle;
-}
-
 .game-panel {
   width: 100%;
 }
@@ -1117,11 +1094,6 @@ body::before {
   h1#page-title {
     font-size: 32px;
     line-height: 1.1;
-  }
-
-  .title-usagi {
-    width: 1.4em;
-    height: 1.4em;
   }
 
   .game-grid {
@@ -1180,13 +1152,8 @@ main h1#page-title {
 }
 
 #page-title .title-usagi {
-  width: 1.65em;
+  width: 2.65em;
   height: 1.65em;
-  padding: 4px;
-  border: 1px solid rgba(48, 57, 67, 0.12);
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(56, 65, 76, 0.1);
 }
 
 .game-grid {
