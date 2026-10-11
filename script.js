@@ -56,6 +56,7 @@ function startRound() {
     round = 0;
     total = 0;
   }
+  swatch.classList.add("is-playing");
   round++;
   target = [
     Math.floor(Math.random() * 360),
