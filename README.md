@@ -1,2 +1,2 @@
 # aaa
-idk yet, just playing around
+I CANT FIND A CHIIKAWA GAME ANYWWHERE so ill make one
