@@ -307,6 +307,30 @@ h2 {
   pointer-events: none;
 }
 
+.memorize-time {
+  position: absolute;
+  z-index: 3;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  min-width: 44px;
+  height: 36px;
+  place-items: center;
+  padding: 0 9px;
+  border: 1px solid rgba(140, 92, 111, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 250, 246, 0.94);
+  box-shadow: 0 4px 14px rgba(140, 92, 111, 0.12);
+  color: var(--coral);
+  font-family: "VT323", monospace;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.memorize-time[hidden] {
+  display: none;
+}
+
 #swatch {
   position: relative;
   z-index: 1;
@@ -460,6 +484,11 @@ h2 {
   background-repeat: no-repeat;
   background-size: 100% 4px;
   cursor: pointer;
+}
+
+.slider-control input:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
 }
 
 .slider-control input::-webkit-slider-runnable-track {
@@ -722,6 +751,294 @@ h2 {
   }
 }
 
+/* Color-tool reference treatment */
+:root {
+  color-scheme: light;
+  --ink: #252a31;
+  --muted: #7a8088;
+  --paper: #f1f2f3;
+  --line: rgba(43, 50, 59, 0.12);
+  --coral: #f13278;
+  --cyan: #18b9d7;
+  --acid: #c8e947;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 15% 12%, rgba(255, 255, 255, 0.96), transparent 38%),
+    radial-gradient(ellipse at 89% 82%, rgba(199, 230, 243, 0.44), transparent 36%),
+    #f0f1f2;
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+
+body::before {
+  background-image: radial-gradient(rgba(37, 42, 49, 0.11) 0.6px, transparent 0.6px);
+  background-size: 7px 7px;
+  opacity: 0.16;
+}
+
+.page-shell {
+  width: min(1420px, calc(100% - 72px));
+  min-height: 100vh;
+  align-content: center;
+  gap: 16px;
+  padding: 30px 0;
+}
+
+#page-title {
+  min-height: 74px;
+  gap: 12px;
+  color: #343a42;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.title-usagi {
+  width: 1.65em;
+  height: 1.65em;
+  padding: 4px;
+  border: 1px solid rgba(48, 57, 67, 0.12);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(56, 65, 76, 0.1);
+}
+
+.game-panel {
+  border: 1px solid rgba(43, 50, 59, 0.1);
+  border-radius: 10px;
+  background: rgba(249, 250, 250, 0.98);
+  box-shadow: 0 14px 40px rgba(45, 55, 68, 0.08);
+}
+
+.game-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: 0;
+  padding: 22px;
+}
+
+.specimen {
+  min-width: 0;
+  padding-right: 18px;
+}
+
+.specimen-stage {
+  height: clamp(360px, 46vh, 480px);
+  border: 1px solid rgba(52, 62, 73, 0.1);
+  border-radius: 8px;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.96), rgba(244, 246, 247, 0.95));
+}
+
+.specimen-stage::before {
+  background-image: radial-gradient(rgba(56, 67, 79, 0.15) 0.6px, transparent 0.6px);
+  background-size: 8px 8px;
+  opacity: 0.13;
+}
+
+#swatch {
+  border-radius: 8px;
+}
+
+.memorize-time {
+  top: 12px;
+  right: 12px;
+  min-width: 40px;
+  height: 30px;
+  border-color: rgba(43, 50, 59, 0.12);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 2px 8px rgba(43, 50, 59, 0.1);
+  color: #343a42;
+  font-family: var(--mono);
+  font-size: 16px;
+}
+
+.result-swatches {
+  gap: 18px;
+  padding: 24px;
+}
+
+.result-swatch {
+  align-items: center;
+  gap: 14px;
+  color: #626a73;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.result-color {
+  width: min(100%, 210px);
+  aspect-ratio: 1;
+  flex: 0 1 auto;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 10px 28px rgba(44, 53, 63, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.46);
+}
+
+.game-status {
+  min-height: 36px;
+  margin: 10px 2px 0;
+  color: #565e67;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 28px 30px 28px 34px;
+  border-left: 1px solid var(--line);
+}
+
+.slider-control {
+  margin-bottom: 26px;
+}
+
+.slider-heading {
+  margin-bottom: 7px;
+  color: #3b424a;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.slider-heading output {
+  color: #737a82;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.slider-control input {
+  height: 22px;
+  background-size: 100% 6px;
+}
+
+#hue {
+  background-size: 100% 6px;
+}
+
+.slider-control input::-webkit-slider-runnable-track {
+  height: 6px;
+}
+
+.slider-control input::-moz-range-track {
+  height: 6px;
+}
+
+.slider-control input::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  border: 2px solid white;
+  background: #3e4650;
+  box-shadow: 0 1px 4px rgba(30, 40, 50, 0.32);
+}
+
+.slider-control input::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 2px solid white;
+  background: #3e4650;
+  box-shadow: 0 1px 4px rgba(30, 40, 50, 0.32);
+}
+
+#hue::-webkit-slider-thumb,
+#hue::-moz-range-thumb {
+  background: white;
+  box-shadow: 0 1px 5px rgba(30, 40, 50, 0.34);
+}
+
+#button {
+  min-height: 46px;
+  justify-content: center;
+  margin-top: 3px;
+  border: 0;
+  border-radius: 6px;
+  background: #087fc4;
+  box-shadow: 0 4px 10px rgba(8, 127, 196, 0.18);
+  color: white;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+
+#button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #096da7;
+  color: white;
+}
+
+#button:disabled {
+  border: 0;
+  background: #aebbc4;
+  color: #f8fafb;
+}
+
+@media (max-width: 700px) {
+  .page-shell {
+    width: calc(100% - 28px);
+    gap: 12px;
+    padding: 18px 0 28px;
+  }
+
+  #page-title {
+    min-height: 62px;
+    gap: 8px;
+    font-size: 25px;
+  }
+
+  .title-usagi {
+    width: 1.5em;
+    height: 1.5em;
+  }
+
+  .game-panel {
+    border-radius: 8px;
+  }
+
+  .game-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 12px;
+  }
+
+  .specimen {
+    padding: 0;
+  }
+
+  .specimen-stage {
+    height: clamp(220px, 68vw, 290px);
+  }
+
+  .result-swatches {
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .result-swatch {
+    font-size: 11px;
+  }
+
+  .controls {
+    padding: 18px 4px 4px;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .slider-control {
+    margin-bottom: 17px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -817,5 +1134,131 @@ h2 {
     border-top: 1px solid var(--line);
     border-left: 0;
   }
+}
+
+main.page-shell {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  width: min(1240px, calc(100% - 96px));
+  min-height: 100vh;
+  gap: 16px;
+  padding: 30px 0;
+}
+
+.explosion-frame {
+  position: fixed;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  transform: none;
+  pointer-events: none;
+  user-select: none;
+}
+
+.explosion-frame--tall {
+  display: none;
+}
+
+main h1#page-title,
+main .game-panel {
+  position: relative;
+  z-index: 1;
+}
+
+main h1#page-title {
+  min-height: 74px;
+  gap: 12px;
+  color: #343a42;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+#page-title .title-usagi {
+  width: 1.65em;
+  height: 1.65em;
+  padding: 4px;
+  border: 1px solid rgba(48, 57, 67, 0.12);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(56, 65, 76, 0.1);
+}
+
+.game-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+  gap: 0;
+  padding: 22px;
+}
+
+.specimen {
+  min-width: 0;
+  padding-right: 18px;
+}
+
+.specimen-stage {
+  height: clamp(360px, 46vh, 480px);
+}
+
+.controls {
+  padding: 28px 30px 28px 34px;
+}
+
+@media (max-width: 700px) {
+  main.page-shell {
+    width: calc(100% - 28px);
+    gap: 12px;
+    min-height: 100vh;
+    padding: 18px 0 28px;
+  }
+
+  .explosion-frame--wide {
+    display: none;
+  }
+
+  .explosion-frame--tall {
+    top: 0;
+    left: -15vw;
+    display: block;
+    width: 130vw;
+    height: 100vh;
+  }
+
+  main h1#page-title {
+    min-height: 62px;
+    gap: 8px;
+    font-size: 25px;
+  }
+
+  #page-title .title-usagi {
+    width: 1.5em;
+    height: 1.5em;
+  }
+
+  .game-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 12px;
+  }
+
+  .specimen {
+    padding: 0;
+  }
+
+  .specimen-stage {
+    height: clamp(220px, 68vw, 290px);
+  }
+
+  .controls {
+    padding: 18px 4px 4px;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
 }
 

@@ -2,6 +2,7 @@ const ROUNDS = 5;
 const MEMORIZE_MS = 3000;
 
 const swatch = document.getElementById("swatch");
+const memorizeTime = document.getElementById("memorize-time");
 const resultSwatches = document.getElementById("result-swatches");
 const guessColor = document.getElementById("guess-color");
 const targetColor = document.getElementById("target-color");
@@ -22,6 +23,7 @@ let round = 0;
 let total = 0;
 let guessing = false;
 let target = [0, 0, 0];
+let countdownInterval = null;
 
 
 function hsbToCss(h, s, b) {
@@ -43,6 +45,12 @@ function calcScore(t, g) {
 
 function getGuess() {
   return [+sliders.hue.value, +sliders.sat.value, +sliders.bri.value];
+}
+
+function setSlidersDisabled(disabled) {
+  Object.values(sliders).forEach(slider => {
+    slider.disabled = disabled;
+  });
 }
 
 function updateSliderTracks() {
@@ -70,6 +78,20 @@ function startRound() {
   }
   resultSwatches.hidden = true;
   swatch.hidden = false;
+  memorizeTime.hidden = false;
+  let millisecondsRemaining = MEMORIZE_MS;
+  memorizeTime.textContent = (millisecondsRemaining / 1000).toFixed(1);
+  clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    millisecondsRemaining = Math.max(0, millisecondsRemaining - 400);
+    if (millisecondsRemaining > 0) {
+      memorizeTime.textContent = (millisecondsRemaining / 1000).toFixed(1);
+    } else {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }, 400);
+  setSlidersDisabled(true);
   swatch.classList.add("is-playing");
   round++;
   target = [
@@ -85,10 +107,14 @@ function startRound() {
 }
 
 function beginGuess() {
+  memorizeTime.hidden = true;
+  clearInterval(countdownInterval);
+  countdownInterval = null;
   sliders.hue.value = 0;
   sliders.sat.value = 50;
   sliders.bri.value = 50;
   guessing = true;
+  setSlidersDisabled(false);
   updateSwatch();
   info.textContent = "match the color";
   button.textContent = "submit";
@@ -98,6 +124,7 @@ function beginGuess() {
 
 function submit() {
   guessing = false;
+  setSlidersDisabled(true);
   const guess = getGuess();
   const score = calcScore(target, guess);
   total += score;
@@ -105,11 +132,14 @@ function submit() {
   targetColor.style.backgroundColor = hsbToCss(...target);
   swatch.hidden = true;
   resultSwatches.hidden = false;
-  info.textContent = `Score: ${score}  |  Total: ${total}`;
+  info.textContent = round < ROUNDS
+    ? `Score: ${score}  |  Total: ${total}`
+    : `Final score: ${total} / ${ROUNDS * 100}`;
   button.textContent = round < ROUNDS ? "next round" : "play again";
   button.onclick = startRound;
 }
 
+setSlidersDisabled(true);
 updateSliderTracks();
 Object.values(sliders).forEach(s => s.addEventListener("input", updateSwatch));
 button.onclick = startRound;
