@@ -16,7 +16,7 @@ main {
 #swatch {
   width: 100%;
   height: 200px;
-  background: gray;
+  background: #a1cfce;
   border-radius: 12px;
   margin-bottom: 15px;
 }
