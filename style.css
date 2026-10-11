@@ -42,12 +42,12 @@ button {
   padding: 10px 30px;
   border: none;
   border-radius: 8px;
-  background: #4a90e2;
-  color: white;
+  background: #4a92e4;
+  color: rgb(253, 255, 145);
   cursor: pointer;
 }
 
 button:disabled {
-  background: #555;
+  background: #f2faa8;
   cursor: not-allowed;
 }
