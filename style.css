@@ -751,7 +751,6 @@ h2 {
   }
 }
 
-/* Color-tool reference treatment */
 :root {
   color-scheme: light;
   --ink: #252a31;
@@ -962,7 +961,7 @@ body::before {
   margin-top: 3px;
   border: 0;
   border-radius: 6px;
-  background: #087fc4;
+  background: #0481c9;
   box-shadow: 0 4px 10px rgba(8, 127, 196, 0.18);
   color: white;
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
@@ -1259,6 +1258,4 @@ main h1#page-title {
     border-top: 1px solid var(--line);
     border-left: 0;
   }
-
 }
-
