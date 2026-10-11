@@ -3,29 +3,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Color Game</title>
+  <title>usagi ate all the colors</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main>
-    <h1>Color Game</h1>
+  <main id="top" class="page-shell">
+    <h1 id="page-title"><img class="title-usagi" src="assets/usagi.png" alt="Usagi"> ate all the colors</h1>
+    <section class="game-panel" aria-labelledby="page-title">
+      <div class="game-grid">
+        <section class="specimen" aria-label="Color swatch">
+          <div class="specimen-stage">
+            <div id="swatch" role="img" aria-label="Animated character and target color"></div>
+            <div id="result-swatches" class="result-swatches" hidden>
+              <div class="result-swatch">
+                <span>Your color</span>
+                <div id="guess-color" class="result-color" role="img" aria-label="Your color"></div>
+              </div>
+              <div class="result-swatch">
+                <span>Target color</span>
+                <div id="target-color" class="result-color" role="img" aria-label="Target color"></div>
+              </div>
+            </div>
+          </div>
+          <p id="info" class="game-status" aria-live="polite">Press Start</p>
+        </section>
 
-    <div id="swatch"></div>
-    <p id="info">Press Start</p>
-
-    <div id="sliders">
-      <label>Hue: <span id="hueVal">0</span>
-        <input type="range" id="hue" min="0" max="360" value="0">
-      </label>
-      <label>Saturation: <span id="satVal">50</span>
-        <input type="range" id="sat" min="0" max="100" value="50">
-      </label>
-      <label>Brightness: <span id="briVal">50</span>
-        <input type="range" id="bri" min="0" max="100" value="50">
-      </label>
-    </div>
-
-    <button id="button">Start</button>
+        <section class="controls" aria-label="Color controls">
+          <div id="sliders">
+            <label class="slider-control" for="hue">
+              <span class="slider-heading"><span>Hue:</span> <output id="hueVal" for="hue">0</output></span>
+              <input type="range" id="hue" min="0" max="360" value="0">
+            </label>
+            <label class="slider-control" for="sat">
+              <span class="slider-heading"><span>Saturation:</span> <output id="satVal" for="sat">50</output></span>
+              <input type="range" id="sat" min="0" max="100" value="50">
+            </label>
+            <label class="slider-control" for="bri">
+              <span class="slider-heading"><span>Brightness:</span> <output id="briVal" for="bri">50</output></span>
+              <input type="range" id="bri" min="0" max="100" value="50">
+            </label>
+          </div>
+          <button id="button" type="button">Start</button>
+        </section>
+      </div>
+    </section>
   </main>
 
   <script src="script.js"></script>

@@ -2,6 +2,9 @@ const ROUNDS = 5;
 const MEMORIZE_MS = 3000;
 
 const swatch = document.getElementById("swatch");
+const resultSwatches = document.getElementById("result-swatches");
+const guessColor = document.getElementById("guess-color");
+const targetColor = document.getElementById("target-color");
 const info = document.getElementById("info");
 const button = document.getElementById("button");
 const sliders = {
@@ -20,7 +23,7 @@ let total = 0;
 let guessing = false;
 let target = [0, 0, 0];
 
-// CSS doesn't support HSB directly, so convert HSB -> HSL
+
 function hsbToCss(h, s, b) {
   s /= 100;
   b /= 100;
@@ -31,7 +34,7 @@ function hsbToCss(h, s, b) {
 
 function calcScore(t, g) {
   let dh = Math.abs(t[0] - g[0]);
-  dh = Math.min(dh, 360 - dh) / 180; // hue wraps around
+  dh = Math.min(dh, 360 - dh) / 180; // 
   const ds = Math.abs(t[1] - g[1]) / 100;
   const db = Math.abs(t[2] - g[2]) / 100;
   const dist = Math.sqrt(dh ** 2 + ds ** 2 + db ** 2);
@@ -42,10 +45,19 @@ function getGuess() {
   return [+sliders.hue.value, +sliders.sat.value, +sliders.bri.value];
 }
 
+function updateSliderTracks() {
+  const [hue, saturation, brightness] = getGuess();
+  sliders.sat.style.backgroundImage =
+    `linear-gradient(90deg, ${hsbToCss(hue, 0, brightness)}, ${hsbToCss(hue, 100, brightness)})`;
+  sliders.bri.style.backgroundImage =
+    `linear-gradient(90deg, #000000, ${hsbToCss(hue, saturation, 100)})`;
+}
+
 function updateSwatch() {
   labels.hue.textContent = sliders.hue.value;
   labels.sat.textContent = sliders.sat.value;
   labels.bri.textContent = sliders.bri.value;
+  updateSliderTracks();
   if (guessing) {
     swatch.style.background = hsbToCss(...getGuess());
   }
@@ -56,12 +68,14 @@ function startRound() {
     round = 0;
     total = 0;
   }
+  resultSwatches.hidden = true;
+  swatch.hidden = false;
   swatch.classList.add("is-playing");
   round++;
   target = [
     Math.floor(Math.random() * 360),
-    Math.floor(Math.random() * 101),
-    Math.floor(Math.random() * 101),
+    65 + Math.floor(Math.random() * 36),
+    68 + Math.floor(Math.random() * 33),
   ];
   guessing = false;
   swatch.style.background = hsbToCss(...target);
@@ -76,8 +90,8 @@ function beginGuess() {
   sliders.bri.value = 50;
   guessing = true;
   updateSwatch();
-  info.textContent = "Match the color!";
-  button.textContent = "Submit";
+  info.textContent = "match the color";
+  button.textContent = "submit";
   button.disabled = false;
   button.onclick = submit;
 }
@@ -87,13 +101,15 @@ function submit() {
   const guess = getGuess();
   const score = calcScore(target, guess);
   total += score;
-  swatch.style.background = hsbToCss(...target);
-  info.textContent =
-    `Score: ${score}  |  Total: ${total}\n` +
-    `Guess: ${guess.join(", ")}  Target: ${target.join(", ")}`;
-  button.textContent = round < ROUNDS ? "Next round" : "Play again";
+  guessColor.style.backgroundColor = hsbToCss(...guess);
+  targetColor.style.backgroundColor = hsbToCss(...target);
+  swatch.hidden = true;
+  resultSwatches.hidden = false;
+  info.textContent = `Score: ${score}  |  Total: ${total}`;
+  button.textContent = round < ROUNDS ? "next round" : "play again";
   button.onclick = startRound;
 }
 
+updateSliderTracks();
 Object.values(sliders).forEach(s => s.addEventListener("input", updateSwatch));
 button.onclick = startRound;
