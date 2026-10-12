@@ -1,11 +1,13 @@
-const ROUNDS = 5;
 const MEMORIZE_MS = 3000;
+const MAX_HP = 10;
 
 const swatch = document.getElementById("swatch");
 const memorizeTime = document.getElementById("memorize-time");
 const resultSwatches = document.getElementById("result-swatches");
 const guessColor = document.getElementById("guess-color");
 const targetColor = document.getElementById("target-color");
+const playerHpBar = document.getElementById("player-hp");
+const enemyHpBar = document.getElementById("enemy-hp");
 const info = document.getElementById("info");
 const button = document.getElementById("button");
 const sliders = {
@@ -19,11 +21,12 @@ const labels = {
   bri: document.getElementById("briVal"),
 };
 
-let round = 0;
-let total = 0;
+let playerHp = MAX_HP;
+let enemyHp = MAX_HP;
 let guessing = false;
 let target = [0, 0, 0];
 let countdownInterval = null;
+let enemyTimeout = null;
 
 
 function hsbToCss(h, s, b) {
@@ -36,11 +39,20 @@ function hsbToCss(h, s, b) {
 
 function calcScore(t, g) {
   let dh = Math.abs(t[0] - g[0]);
-  dh = Math.min(dh, 360 - dh) / 180; // 
+  dh = Math.min(dh, 360 - dh) / 180;
   const ds = Math.abs(t[1] - g[1]) / 100;
   const db = Math.abs(t[2] - g[2]) / 100;
   const dist = Math.sqrt(dh ** 2 + ds ** 2 + db ** 2);
   return Math.max(0, Math.round(100 * (1 - dist)));
+}
+
+function calcDamage(score) {
+  if (score >= 90) return 5;
+  if (score >= 80) return 4;
+  if (score >= 70) return 3;
+  if (score >= 60) return 2;
+  if (score >= 50) return 1;
+  return 0;
 }
 
 function getGuess() {
@@ -71,11 +83,51 @@ function updateSwatch() {
   }
 }
 
-function startRound() {
-  if (round >= ROUNDS) {
-    round = 0;
-    total = 0;
+function renderHpBar(bar, hp) {
+  bar.replaceChildren();
+  for (let i = 0; i < MAX_HP; i++) {
+    const slot = document.createElement("span");
+    slot.className = "hp-slot";
+    if (i >= hp) {
+      slot.classList.add("empty");
+      slot.style.backgroundColor = "#c4c8cc";
+    }
+    bar.append(slot);
   }
+}
+
+function renderHp() {
+  renderHpBar(playerHpBar, playerHp);
+  renderHpBar(enemyHpBar, enemyHp);
+}
+
+function resetBattle() {
+  clearTimeout(enemyTimeout);
+  enemyTimeout = null;
+  playerHp = MAX_HP;
+  enemyHp = MAX_HP;
+  renderHp();
+}
+
+function playAgain() {
+  resetBattle();
+  startRound();
+}
+
+function endGame(message) {
+  clearTimeout(enemyTimeout);
+  enemyTimeout = null;
+  guessing = false;
+  setSlidersDisabled(true);
+  info.textContent = message;
+  button.textContent = "play again";
+  button.disabled = false;
+  button.onclick = playAgain;
+}
+
+function startRound() {
+  clearTimeout(enemyTimeout);
+  enemyTimeout = null;
   resultSwatches.hidden = true;
   swatch.hidden = false;
   memorizeTime.hidden = false;
@@ -93,7 +145,6 @@ function startRound() {
   }, 400);
   setSlidersDisabled(true);
   swatch.classList.add("is-playing");
-  round++;
   target = [
     Math.floor(Math.random() * 360),
     65 + Math.floor(Math.random() * 36),
@@ -101,7 +152,7 @@ function startRound() {
   ];
   guessing = false;
   swatch.style.background = hsbToCss(...target);
-  info.textContent = `Round ${round}/${ROUNDS}: memorize!`;
+  info.textContent = "memorize!";
   button.disabled = true;
   setTimeout(beginGuess, MEMORIZE_MS);
 }
@@ -122,24 +173,48 @@ function beginGuess() {
   button.onclick = submit;
 }
 
+function enemyAttack() {
+  const damage = 1 + Math.floor(Math.random() * 4);
+  playerHp = Math.max(0, playerHp - damage);
+  renderHp();
+
+  if (playerHp <= 0) {
+    endGame(`Enemy hit for ${damage}. You lose.`);
+    return;
+  }
+
+  info.textContent = `Enemy hit for ${damage}.`;
+  button.textContent = "una una";
+  button.disabled = false;
+  button.onclick = startRound;
+}
+
 function submit() {
   guessing = false;
   setSlidersDisabled(true);
   const guess = getGuess();
   const score = calcScore(target, guess);
-  total += score;
+  const damage = calcDamage(score);
+  enemyHp = Math.max(0, enemyHp - damage);
+  renderHp();
   guessColor.style.backgroundColor = hsbToCss(...guess);
   targetColor.style.backgroundColor = hsbToCss(...target);
   swatch.hidden = true;
   resultSwatches.hidden = false;
-  info.textContent = round < ROUNDS
-    ? `Score: ${score}  |  Total: ${total}`
-    : `Final score: ${total} / ${ROUNDS * 100}`;
-  button.textContent = round < ROUNDS ? "una una" : "play again";
-  button.onclick = startRound;
+
+  if (enemyHp <= 0) {
+    endGame(`Score: ${score}. You hit for ${damage}. You win.`);
+    return;
+  }
+
+  info.textContent = `Score: ${score}. You hit for ${damage}.`;
+  button.textContent = "enemy turn";
+  button.disabled = true;
+  enemyTimeout = setTimeout(enemyAttack, 900);
 }
 
 setSlidersDisabled(true);
+renderHp();
 updateSliderTracks();
 Object.values(sliders).forEach(s => s.addEventListener("input", updateSwatch));
 button.onclick = startRound;

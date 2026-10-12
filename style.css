@@ -1226,3 +1226,48 @@ main h1#page-title {
     border-left: 0;
   }
 }
+
+.battle-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.hp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hp-name {
+  flex: 0 0 44px;
+  color: #565e67;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.hp-bar {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+
+.hp-slot {
+  flex: 1 1 0;
+  height: 10px;
+  min-width: 0;
+  background: #f13278;
+}
+
+#enemy-hp .hp-slot {
+  background: #18b9d7;
+}
+
+.hp-slot.empty {
+  transform: scale(0.72);
+  background: #c4c8cc;
+}
