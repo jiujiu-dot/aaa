@@ -374,9 +374,6 @@ function clearBeginGuessTimer() {
 function setupEnemy() {
   const enemy = currentEnemy();
   enemyHp = enemy.hp;
-  enemyNameLabel.textContent = enemy.name;
-  enemyNameLabel.style.color = enemy.color;
-  enemySprite.style.backgroundColor = enemy.color;
   buildBar(enemyHpBar, enemy.color, enemy.hp);
 }
 

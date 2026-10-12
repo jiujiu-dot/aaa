@@ -1299,10 +1299,12 @@ main h1#page-title {
 
 .fighter-player {
   left: 24%;
+  z-index: 1;
 }
 
 .fighter-enemy {
-  right: 24%;
+  right: 2%;
+  z-index: 0;
 }
 
 .fighter-sprite {
@@ -1316,12 +1318,14 @@ main h1#page-title {
 }
 
 .fighter-enemy .fighter-sprite {
-  background-color: #6aa7f0;
+  width: min(960px, 88vw, calc((min(78vh, 720px) - 170px) * 1.75));
+  height: auto;
+  aspect-ratio: 7 / 4;
+  background-color: transparent;
   background-image: url("assets/BUG.png");
-  background-position: center;
+  background-position: center bottom;
   background-repeat: no-repeat;
   background-size: contain;
-  transition: background-color 300ms ease;
 }
 
 .fighter-name {
@@ -1333,8 +1337,7 @@ main h1#page-title {
 }
 
 #enemy-name {
-  color: #6aa7f0;
-  transition: color 300ms ease;
+  display: none;
 }
 
 .color-panel {
@@ -1901,38 +1904,21 @@ main h1#page-title {
   pointer-events: none;
 }
 
-.fighter::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  left: 50%;
-  bottom: -16px;
-  width: 132px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(58, 46, 68, 0.2);
-  filter: blur(5px);
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
 @media (min-width: 801px) {
   .fighter {
     top: auto;
     bottom: 150px;
   }
 
-  .color-panel {
-    left: 0;
-    right: 0;
-    bottom: 16px;
-    margin: 0 auto;
+  .fighter-enemy {
+    bottom: 60px;
   }
-}
 
-@media (max-width: 800px) {
-  .fighter::after {
-    display: none;
+  .color-panel {
+    left: auto;
+    right: 16px;
+    bottom: 16px;
+    margin: 0;
   }
 }
 
