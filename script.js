@@ -21,6 +21,9 @@ const battleArena = document.querySelector(".battle-arena");
 const dangerVignette = document.getElementById("danger-vignette");
 const roundLabel = document.getElementById("round-label");
 const enemyFighter = document.querySelector(".fighter-enemy");
+const playerSprite = document.getElementById("player-sprite");
+const colorPanel = document.querySelector(".color-panel");
+const panelHandle = document.getElementById("panel-handle");
 const sliders = {
   hue: document.getElementById("hue"),
   sat: document.getElementById("sat"),
@@ -43,6 +46,9 @@ let introTimers = [];
 let shakeTimer = null;
 let flashTimer = null;
 let round = 0;
+let dropTimers = [];
+let dropItem = null;
+let dropShadow = null;
 
 
 function hsbToCss(h, s, b) {
@@ -99,23 +105,72 @@ function updateSwatch() {
   }
 }
 
-function renderHpBar(bar, hp) {
-  bar.replaceChildren();
-  for (let i = 0; i < MAX_HP; i++) {
-    const slot = document.createElement("span");
-    slot.className = "hp-slot";
-    if (i >= hp) {
-      slot.classList.add("empty");
-      slot.style.backgroundColor = "#c4c8cc";
-    }
-    bar.append(slot);
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+function buildWavePath() {
+  const points = [];
+  for (let x = 3; x <= 247; x += 2) {
+    const y = 12 + 5 * Math.sin(((x - 3) / 244) * Math.PI * 2 * 6);
+    points.push(`${x} ${y}`);
   }
+  return `M ${points.join(" L ")}`;
+}
+
+function buildBar(bar) {
+  bar.replaceChildren();
+  const d = buildWavePath();
+  const clipId = `clip-${bar.id}`;
+
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("viewBox", "0 0 250 24");
+  svg.setAttribute("width", "100%");
+  svg.setAttribute("height", "24");
+  svg.setAttribute("overflow", "visible");
+
+  const defs = document.createElementNS(SVG_NS, "defs");
+  const clipPath = document.createElementNS(SVG_NS, "clipPath");
+  clipPath.setAttribute("id", clipId);
+  const clipRect = document.createElementNS(SVG_NS, "rect");
+  clipRect.setAttribute("class", "hp-clip");
+  clipRect.setAttribute("x", "0");
+  clipRect.setAttribute("y", "0");
+  clipRect.setAttribute("width", "250");
+  clipRect.setAttribute("height", "24");
+  clipPath.append(clipRect);
+  defs.append(clipPath);
+
+  const track = document.createElementNS(SVG_NS, "path");
+  track.setAttribute("d", d);
+  track.setAttribute("fill", "none");
+  track.setAttribute("stroke", "#cfcdc4");
+  track.setAttribute("stroke-width", "3");
+  track.setAttribute("stroke-linecap", "round");
+  track.setAttribute("stroke-linejoin", "round");
+
+  const fill = document.createElementNS(SVG_NS, "path");
+  fill.setAttribute("d", d);
+  fill.setAttribute("fill", "none");
+  fill.setAttribute("stroke", bar.id === "player-hp" ? "#f13278" : "#18b9d7");
+  fill.setAttribute("stroke-width", "4");
+  fill.setAttribute("stroke-linecap", "round");
+  fill.setAttribute("stroke-linejoin", "round");
+  fill.setAttribute("clip-path", `url(#${clipId})`);
+
+  svg.append(defs, track, fill);
+  bar.append(svg);
 }
 
 function renderHp() {
-  renderHpBar(playerHpBar, playerHp);
-  renderHpBar(enemyHpBar, enemyHp);
+  setBarWidth(playerHpBar, playerHp);
+  setBarWidth(enemyHpBar, enemyHp);
   dangerVignette.classList.toggle("active", playerHp < 5);
+}
+
+function setBarWidth(bar, hp) {
+  const rect = bar.querySelector(".hp-clip");
+  if (rect) {
+    rect.setAttribute("width", String(250 * hp / MAX_HP));
+  }
 }
 
 function shakeArena(damage) {
@@ -172,6 +227,56 @@ function clearFlash() {
   clearTimeout(flashTimer);
   flashTimer = null;
   enemyHpBar.classList.remove("flash");
+}
+
+function clearDropItem() {
+  dropTimers.forEach(id => clearTimeout(id));
+  dropTimers = [];
+  if (dropItem) {
+    dropItem.remove();
+    dropItem = null;
+  }
+  if (dropShadow) {
+    dropShadow.remove();
+    dropShadow = null;
+  }
+  playerSprite.classList.remove("poof-out");
+  playerSprite.style.opacity = "";
+  playerSprite.style.transform = "";
+}
+
+function spawnItemDrop() {
+  const arenaRect = battleArena.getBoundingClientRect();
+  const spriteRect = playerSprite.getBoundingClientRect();
+  const centerX = spriteRect.left - arenaRect.left + spriteRect.width / 2;
+  const groundY = spriteRect.bottom - arenaRect.top;
+
+  playerSprite.classList.add("poof-out");
+
+  dropTimers.push(setTimeout(() => {
+    dropShadow = document.createElement("div");
+    dropShadow.className = "drop-shadow is-pop";
+    dropShadow.style.left = `${centerX}px`;
+    dropShadow.style.top = `${groundY - 7}px`;
+    battleArena.append(dropShadow);
+
+    dropItem = document.createElement("img");
+    dropItem.className = "drop-item is-pop";
+    dropItem.src = "assets/rotten-flesh.jpg";
+    dropItem.alt = "";
+    dropItem.style.left = `${centerX}px`;
+    dropItem.style.top = `${groundY - 64}px`;
+    battleArena.append(dropItem);
+
+    const settle = event => {
+      if (event.animationName !== "drop-pop") return;
+      dropItem.classList.remove("is-pop");
+      dropItem.classList.add("is-idle");
+      dropShadow.classList.remove("is-pop");
+      dropShadow.classList.add("is-idle");
+    };
+    dropItem.addEventListener("animationend", settle);
+  }, 250));
 }
 
 function clearGuessTimer() {
@@ -249,6 +354,7 @@ function resetBattle() {
   clearShake();
   clearFlash();
   clearFloats();
+  clearDropItem();
   playerHp = MAX_HP;
   enemyHp = MAX_HP;
   renderHp();
@@ -257,6 +363,9 @@ function resetBattle() {
 
 function startFight() {
   hideEndOverlay();
+  if (panelOutsideArena()) {
+    resetPanelPosition();
+  }
   resetBattle();
   runIntro(startRound);
 }
@@ -287,6 +396,7 @@ function resetToIdle() {
   clearShake();
   clearFlash();
   clearFloats();
+  clearDropItem();
   playerHp = MAX_HP;
   enemyHp = MAX_HP;
   renderHp();
@@ -319,7 +429,12 @@ function endGame(result, message) {
   info.textContent = message;
   button.disabled = true;
   button.onclick = null;
-  showEndOverlay(result);
+  if (result === "lose") {
+    spawnItemDrop();
+    dropTimers.push(setTimeout(() => showEndOverlay(result), 1200));
+  } else {
+    showEndOverlay(result);
+  }
 }
 
 function startRound() {
@@ -427,6 +542,8 @@ function submit(timedOut = false) {
 }
 
 setSlidersDisabled(true);
+buildBar(playerHpBar);
+buildBar(enemyHpBar);
 renderHp();
 updateSliderTracks();
 Object.values(sliders).forEach(s => s.addEventListener("input", updateSwatch));
@@ -436,3 +553,162 @@ endPlayAgain.onclick = () => {
   startFight();
 };
 endLeave.onclick = resetToIdle;
+
+/* ===== draggable color panel ===== */
+let panelDrag = null;
+let panelRaf = null;
+let panelPointer = { x: 0, y: 0 };
+let panelOffset = { x: 0, y: 0 };
+
+function panelIsDraggable() {
+  return !window.matchMedia("(max-width: 800px)").matches;
+}
+
+function applyPanelTransform() {
+  colorPanel.style.transform =
+    `translate3d(${panelOffset.x}px, ${panelOffset.y}px, 0)`;
+}
+
+function clampPanel() {
+  if (!panelDrag) {
+    return;
+  }
+  const nextX = Math.min(
+    Math.max(panelPointer.x - panelDrag.grabX - panelDrag.baseLeft, panelDrag.minX),
+    panelDrag.maxX
+  );
+  const nextY = Math.min(
+    Math.max(panelPointer.y - panelDrag.grabY - panelDrag.baseTop, panelDrag.minY),
+    panelDrag.maxY
+  );
+  if (nextX === panelOffset.x && nextY === panelOffset.y) {
+    return;
+  }
+  panelOffset.x = nextX;
+  panelOffset.y = nextY;
+  applyPanelTransform();
+}
+
+function panelFrame() {
+  panelRaf = null;
+  clampPanel();
+}
+
+function schedulePanelFrame() {
+  if (panelRaf === null) {
+    panelRaf = requestAnimationFrame(panelFrame);
+  }
+}
+
+function resetPanelPosition() {
+  panelOffset.x = 0;
+  panelOffset.y = 0;
+  colorPanel.style.transform = "";
+  colorPanel.classList.remove("dragging");
+  document.body.classList.remove("dragging");
+}
+
+function panelOutsideArena() {
+  if (panelOffset.x === 0 && panelOffset.y === 0) {
+    return false;
+  }
+  const arenaRect = battleArena.getBoundingClientRect();
+  const rect = colorPanel.getBoundingClientRect();
+  return rect.left < arenaRect.left ||
+    rect.top < arenaRect.top ||
+    rect.right > arenaRect.right ||
+    rect.bottom > arenaRect.bottom;
+}
+
+function clampPanelToArena() {
+  if (!panelIsDraggable()) {
+    resetPanelPosition();
+    return;
+  }
+  if (panelOffset.x === 0 && panelOffset.y === 0) {
+    return;
+  }
+  const arenaRect = battleArena.getBoundingClientRect();
+  const rect = colorPanel.getBoundingClientRect();
+  const baseLeft = rect.left - panelOffset.x;
+  const baseTop = rect.top - panelOffset.y;
+  const minX = arenaRect.left - baseLeft;
+  const maxX = arenaRect.right - rect.width - baseLeft;
+  const minY = arenaRect.top - baseTop;
+  const maxY = arenaRect.bottom - rect.height - baseTop;
+  panelPointer.x = baseLeft + panelOffset.x;
+  panelPointer.y = baseTop + panelOffset.y;
+  panelDrag = { grabX: 0, grabY: 0, baseLeft, baseTop, minX, maxX, minY, maxY };
+  clampPanel();
+  panelDrag = null;
+}
+
+function onPanelPointerMove(event) {
+  if (!panelDrag) {
+    return;
+  }
+  panelPointer.x = event.clientX;
+  panelPointer.y = event.clientY;
+  schedulePanelFrame();
+}
+
+function onPanelPointerEnd(event) {
+  if (!panelDrag) {
+    return;
+  }
+  if (panelRaf !== null) {
+    cancelAnimationFrame(panelRaf);
+    panelRaf = null;
+  }
+  clampPanel();
+  panelDrag = null;
+  colorPanel.classList.remove("dragging");
+  document.body.classList.remove("dragging");
+  window.removeEventListener("pointermove", onPanelPointerMove);
+  window.removeEventListener("pointerup", onPanelPointerEnd);
+  window.removeEventListener("pointercancel", onPanelPointerEnd);
+  if (panelHandle.hasPointerCapture(event.pointerId)) {
+    panelHandle.releasePointerCapture(event.pointerId);
+  }
+}
+
+panelHandle.addEventListener("pointerdown", event => {
+  if (!panelIsDraggable() || event.button !== 0) {
+    return;
+  }
+  event.preventDefault();
+
+  const arenaRect = battleArena.getBoundingClientRect();
+  const rect = colorPanel.getBoundingClientRect();
+  const baseLeft = rect.left - panelOffset.x;
+  const baseTop = rect.top - panelOffset.y;
+
+  panelPointer.x = event.clientX;
+  panelPointer.y = event.clientY;
+  panelDrag = {
+    grabX: event.clientX - rect.left,
+    grabY: event.clientY - rect.top,
+    baseLeft,
+    baseTop,
+    minX: arenaRect.left - baseLeft,
+    maxX: arenaRect.right - rect.width - baseLeft,
+    minY: arenaRect.top - baseTop,
+    maxY: arenaRect.bottom - rect.height - baseTop,
+  };
+
+  colorPanel.classList.add("dragging");
+  document.body.classList.add("dragging");
+  panelHandle.setPointerCapture(event.pointerId);
+  window.addEventListener("pointermove", onPanelPointerMove);
+  window.addEventListener("pointerup", onPanelPointerEnd);
+  window.addEventListener("pointercancel", onPanelPointerEnd);
+});
+
+panelHandle.addEventListener("dblclick", () => {
+  if (!panelIsDraggable()) {
+    return;
+  }
+  resetPanelPosition();
+});
+
+window.addEventListener("resize", clampPanelToArena);

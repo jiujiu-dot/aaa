@@ -1251,25 +1251,23 @@ main h1#page-title {
 }
 
 .hp-bar {
-  display: flex;
+  display: block;
   flex: 1;
-  gap: 4px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
 }
 
-.hp-slot {
-  flex: 1 1 0;
-  height: 10px;
-  min-width: 0;
-  background: #ec79a3;
+.hp-bar svg {
+  display: block;
+  width: 100%;
+  height: 24px;
+  overflow: visible;
 }
 
-#enemy-hp .hp-slot {
-  background: #72d6e7;
-}
-
-.hp-slot.empty {
-  transform: scale(0.72);
-  background: #c4c8cc;
+.hp-clip {
+  transition: width 350ms ease;
 }
 
 /* ===== battle arena ===== */
@@ -1755,4 +1753,293 @@ main h1#page-title {
 
 #enemy-hp.flash {
   animation: hp-flash-white 150ms ease-out;
+}
+
+/* ===== item drop on defeat ===== */
+@keyframes poof-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+}
+
+.fighter-player .fighter-sprite--animated.poof-out {
+  animation: poof-out 300ms ease-in forwards;
+}
+
+.drop-item {
+  position: absolute;
+  z-index: 70;
+  width: 64px;
+  height: 64px;
+  margin: 0;
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes drop-pop {
+  0% {
+    transform: translateX(-50%) translateY(0) scale(1, 1);
+  }
+
+  35% {
+    transform: translateX(-50%) translateY(-70px) rotate(-10deg) scale(1.06, 1.06);
+  }
+
+  70% {
+    transform: translateX(-50%) translateY(-8px) rotate(5deg) scale(0.98, 1.02);
+  }
+
+  85% {
+    transform: translateX(-50%) translateY(0) rotate(0deg) scale(1.14, 0.84);
+  }
+
+  100% {
+    transform: translateX(-50%) translateY(0) rotate(0deg) scale(1, 1);
+  }
+}
+
+.drop-item.is-pop {
+  animation: drop-pop 600ms ease-out;
+}
+
+@keyframes drop-idle {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0) rotate(-4deg);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-6px) rotate(4deg);
+  }
+}
+
+.drop-item.is-idle {
+  animation: drop-idle 2s ease-in-out infinite;
+}
+
+.drop-shadow {
+  position: absolute;
+  z-index: 69;
+  width: 56px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgba(20, 24, 32, 0.3);
+  filter: blur(2px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+@keyframes shadow-pop {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+
+  35% {
+    transform: translateX(-50%) scale(0.66);
+    opacity: 0.55;
+  }
+
+  85% {
+    transform: translateX(-50%) scale(1.14);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.drop-shadow.is-pop {
+  animation: shadow-pop 600ms ease-out;
+}
+
+@keyframes shadow-idle {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(-50%) scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+.drop-shadow.is-idle {
+  animation: shadow-idle 2s ease-in-out infinite;
+}
+
+/* ===== arena scene: floor + standing fighters ===== */
+.battle-arena {
+  background: #fdf1f5;
+}
+
+.battle-arena::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 150px;
+  background: #e8e2ee;
+  border-top: 2px solid #c6bcd2;
+  pointer-events: none;
+}
+
+.fighter::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: -16px;
+  width: 132px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(58, 46, 68, 0.2);
+  filter: blur(5px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+@media (min-width: 801px) {
+  .fighter {
+    top: auto;
+    bottom: 150px;
+  }
+
+  .color-panel {
+    left: 0;
+    right: 0;
+    bottom: 16px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 800px) {
+  .fighter::after {
+    display: none;
+  }
+}
+
+.result-color {
+  aspect-ratio: 1;
+  border-radius: 12px;
+}
+
+.hp-name {
+  flex-basis: 62px;
+  font-family: "VT323", monospace;
+  font-size: 26px;
+  font-weight: 400;
+}
+
+.fighter-name {
+  font-family: "VT323", monospace;
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* ===== draggable color panel ===== */
+.color-panel {
+  will-change: transform;
+  transition: none;
+}
+
+.panel-handle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 12px;
+  border-bottom: 1px solid rgba(43, 50, 59, 0.1);
+  border-radius: 10px 10px 0 0;
+  color: #7a8088;
+  font-family: "VT323", monospace;
+  font-size: 18px;
+  line-height: 1;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.panel-grip {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 10px;
+  background-image:
+    radial-gradient(circle, #7a8088 1.1px, transparent 1.4px),
+    radial-gradient(circle, #7a8088 1.1px, transparent 1.4px),
+    radial-gradient(circle, #7a8088 1.1px, transparent 1.4px),
+    radial-gradient(circle, #7a8088 1.1px, transparent 1.4px),
+    radial-gradient(circle, #7a8088 1.1px, transparent 1.4px),
+    radial-gradient(circle, #7a8088 1.1px, transparent 1.4px);
+  background-position:
+    1px 1px,
+    6px 1px,
+    11px 1px,
+    1px 7px,
+    6px 7px,
+    11px 7px;
+  background-size: 3px 3px;
+  background-repeat: no-repeat;
+}
+
+.panel-title {
+  line-height: 1;
+}
+
+.color-panel.dragging {
+  z-index: 30;
+  cursor: grabbing;
+  box-shadow: 0 10px 22px rgba(37, 42, 49, 0.16);
+}
+
+.color-panel.dragging .panel-handle,
+.color-panel.dragging .game-grid,
+.color-panel.dragging .game-grid * {
+  transition: none;
+}
+
+.color-panel.dragging .panel-handle {
+  cursor: grabbing;
+}
+
+body.dragging {
+  user-select: none;
+}
+
+body.dragging .fighter-sprite,
+body.dragging #swatch {
+  animation-play-state: paused;
+}
+
+.explosion-frame {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+@media (max-width: 800px) {
+  .panel-handle {
+    display: none;
+  }
+
+  .color-panel.dragging {
+    z-index: auto;
+    cursor: auto;
+    box-shadow: 0 14px 34px rgba(37, 42, 49, 0.18);
+  }
 }
