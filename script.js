@@ -11,6 +11,16 @@ const playerHpBar = document.getElementById("player-hp");
 const enemyHpBar = document.getElementById("enemy-hp");
 const info = document.getElementById("info");
 const button = document.getElementById("button");
+const introOverlay = document.getElementById("intro-overlay");
+const introText = document.getElementById("intro-text");
+const endOverlay = document.getElementById("end-overlay");
+const endTitle = document.getElementById("end-title");
+const endPlayAgain = document.getElementById("end-play-again");
+const endLeave = document.getElementById("end-leave");
+const battleArena = document.querySelector(".battle-arena");
+const dangerVignette = document.getElementById("danger-vignette");
+const roundLabel = document.getElementById("round-label");
+const enemyFighter = document.querySelector(".fighter-enemy");
 const sliders = {
   hue: document.getElementById("hue"),
   sat: document.getElementById("sat"),
@@ -29,6 +39,10 @@ let target = [0, 0, 0];
 let countdownInterval = null;
 let enemyTimeout = null;
 let guessTimeout = null;
+let introTimers = [];
+let shakeTimer = null;
+let flashTimer = null;
+let round = 0;
 
 
 function hsbToCss(h, s, b) {
@@ -101,6 +115,63 @@ function renderHpBar(bar, hp) {
 function renderHp() {
   renderHpBar(playerHpBar, playerHp);
   renderHpBar(enemyHpBar, enemyHp);
+  dangerVignette.classList.toggle("active", playerHp < 5);
+}
+
+function shakeArena(damage) {
+  const strong = damage >= 4;
+  battleArena.classList.remove("screen-shake", "screen-shake--strong");
+  void battleArena.offsetWidth;
+  battleArena.classList.add("screen-shake");
+  if (strong) {
+    battleArena.classList.add("screen-shake--strong");
+  }
+  clearTimeout(shakeTimer);
+  shakeTimer = setTimeout(() => {
+    battleArena.classList.remove("screen-shake", "screen-shake--strong");
+    shakeTimer = null;
+  }, 200);
+}
+
+function clearShake() {
+  clearTimeout(shakeTimer);
+  shakeTimer = null;
+  battleArena.classList.remove("screen-shake", "screen-shake--strong");
+}
+
+function setRound(value) {
+  round = value;
+  roundLabel.textContent = `round ${round}`;
+}
+
+function flashEnemyHp() {
+  clearTimeout(flashTimer);
+  enemyHpBar.classList.remove("flash");
+  void enemyHpBar.offsetWidth;
+  enemyHpBar.classList.add("flash");
+  flashTimer = setTimeout(() => {
+    enemyHpBar.classList.remove("flash");
+    flashTimer = null;
+  }, 150);
+}
+
+function spawnFloat(text, className, parent) {
+  const el = document.createElement("span");
+  el.className = `float-num ${className}`;
+  el.textContent = text;
+  el.style.left = `${30 + Math.random() * 40}%`;
+  parent.append(el);
+  el.addEventListener("animationend", () => el.remove(), { once: true });
+}
+
+function clearFloats() {
+  document.querySelectorAll(".float-num").forEach(el => el.remove());
+}
+
+function clearFlash() {
+  clearTimeout(flashTimer);
+  flashTimer = null;
+  enemyHpBar.classList.remove("flash");
 }
 
 function clearGuessTimer() {
@@ -132,33 +203,127 @@ function startGuessTimer() {
   }, GUESS_MS);
 }
 
+function clearIntroTimers() {
+  introTimers.forEach(id => clearTimeout(id));
+  introTimers = [];
+}
+
+function showIntroStep(text) {
+  introText.textContent = text;
+  introText.style.animation = "none";
+  void introText.offsetWidth;
+  introText.style.animation = "";
+}
+
+function hideIntro() {
+  clearIntroTimers();
+  introOverlay.hidden = true;
+  introText.textContent = "";
+  introText.style.animation = "none";
+  void introText.offsetWidth;
+  introText.style.animation = "";
+}
+
+const INTRO_STEPS = ["3", "2", "1", "FIGHT!"];
+const INTRO_STEP_MS = 800;
+
+function runIntro(onDone) {
+  clearIntroTimers();
+  introOverlay.hidden = false;
+  setSlidersDisabled(true);
+  button.disabled = true;
+  INTRO_STEPS.forEach((step, i) => {
+    introTimers.push(setTimeout(() => showIntroStep(step), i * INTRO_STEP_MS));
+  });
+  introTimers.push(setTimeout(() => {
+    hideIntro();
+    onDone();
+  }, INTRO_STEPS.length * INTRO_STEP_MS));
+}
+
 function resetBattle() {
+  clearIntroTimers();
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
   clearGuessTimer();
+  clearShake();
+  clearFlash();
+  clearFloats();
   playerHp = MAX_HP;
   enemyHp = MAX_HP;
   renderHp();
+  setRound(0);
+}
+
+function startFight() {
+  hideEndOverlay();
+  resetBattle();
+  runIntro(startRound);
 }
 
 function playAgain() {
-  resetBattle();
-  startRound();
+  startFight();
 }
 
-function endGame(message) {
+function showEndOverlay(result) {
+  endOverlay.hidden = false;
+  endOverlay.classList.remove("win", "lose");
+  endOverlay.classList.add(result === "win" ? "win" : "lose");
+  endTitle.textContent = result === "win" ? "YOU WIN!" : "YOU LOSE";
+}
+
+function hideEndOverlay() {
+  endOverlay.hidden = true;
+  endOverlay.classList.remove("win", "lose");
+  endTitle.textContent = "";
+}
+
+function resetToIdle() {
+  hideEndOverlay();
+  clearIntroTimers();
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
   clearGuessTimer();
+  clearShake();
+  clearFlash();
+  clearFloats();
+  playerHp = MAX_HP;
+  enemyHp = MAX_HP;
+  renderHp();
+  round = 0;
+  roundLabel.textContent = "round 1";
+  guessing = false;
+  resultSwatches.hidden = true;
+  swatch.hidden = false;
+  memorizeTime.hidden = true;
+  swatch.style.background = "";
+  swatch.classList.remove("is-playing");
+  info.textContent = "Press Start";
+  setSlidersDisabled(true);
+  button.textContent = "Start";
+  button.disabled = false;
+  button.onclick = startFight;
+}
+
+function endGame(result, message) {
+  clearTimeout(enemyTimeout);
+  enemyTimeout = null;
+  clearGuessTimer();
+  clearIntroTimers();
+  clearShake();
+  clearFlash();
+  clearFloats();
+  hideIntro();
   guessing = false;
   setSlidersDisabled(true);
   info.textContent = message;
-  button.textContent = "play again";
-  button.disabled = false;
-  button.onclick = playAgain;
+  button.disabled = true;
+  button.onclick = null;
+  showEndOverlay(result);
 }
 
 function startRound() {
+  setRound(round + 1);
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
   clearGuessTimer();
@@ -211,9 +376,10 @@ function enemyAttack() {
   const damage = 1 + Math.floor(Math.random() * 4);
   playerHp = Math.max(0, playerHp - damage);
   renderHp();
+  shakeArena(damage);
 
   if (playerHp <= 0) {
-    endGame(`Enemy hit for ${damage}. You lose.`);
+    endGame("lose", `Enemy hit for ${damage}. You lose.`);
     return;
   }
 
@@ -232,20 +398,29 @@ function submit(timedOut = false) {
   setSlidersDisabled(true);
   const guess = getGuess();
   const score = calcScore(target, guess);
-  const damage = calcDamage(score);
+  const crit = score >= 98;
+  const damage = calcDamage(score) + (crit ? 1 : 0);
   enemyHp = Math.max(0, enemyHp - damage);
   renderHp();
+  if (damage > 0) {
+    shakeArena(damage);
+    flashEnemyHp();
+    spawnFloat(`${damage}`, "dmg", enemyFighter);
+  }
+  if (crit) {
+    spawnFloat("CRIT!", "crit", enemyFighter);
+  }
   guessColor.style.backgroundColor = hsbToCss(...guess);
   targetColor.style.backgroundColor = hsbToCss(...target);
   swatch.hidden = true;
   resultSwatches.hidden = false;
 
   if (enemyHp <= 0) {
-    endGame(`Score: ${score}. You hit for ${damage}. You win.`);
+    endGame("win", `${crit ? "CRIT! " : ""}Score: ${score}. You hit for ${damage}. You win.`);
     return;
   }
 
-  info.textContent = `${timedOut ? "Time up. " : ""}Score: ${score}. You hit for ${damage}.`;
+  info.textContent = `${timedOut ? "Time up. " : ""}${crit ? "CRIT! " : ""}Score: ${score}. You hit for ${damage}.`;
   button.textContent = "enemy turn";
   button.disabled = true;
   enemyTimeout = setTimeout(enemyAttack, 900);
@@ -255,4 +430,9 @@ setSlidersDisabled(true);
 renderHp();
 updateSliderTracks();
 Object.values(sliders).forEach(s => s.addEventListener("input", updateSwatch));
-button.onclick = startRound;
+button.onclick = startFight;
+endPlayAgain.onclick = () => {
+  hideEndOverlay();
+  startFight();
+};
+endLeave.onclick = resetToIdle;

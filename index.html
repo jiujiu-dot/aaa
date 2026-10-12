@@ -29,6 +29,8 @@
         </div>
       </div>
 
+      <div id="round-label" class="round-label">round 1</div>
+
       <!-- placeholders: swap these divs for <img> tags later -->
       <div class="fighter fighter-player">
         <span class="fighter-name">player</span>
@@ -78,8 +80,22 @@
           </section>
         </div>
       </section>
+
+      <div id="danger-vignette" aria-hidden="true"></div>
     </section>
   </main>
+
+  <div id="intro-overlay" hidden>
+    <span id="intro-text" aria-live="assertive"></span>
+  </div>
+
+  <div id="end-overlay" hidden>
+    <h2 id="end-title"></h2>
+    <div class="end-actions">
+      <button id="end-play-again" type="button">play again</button>
+      <button id="end-leave" type="button">leave</button>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
