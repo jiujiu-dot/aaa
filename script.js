@@ -376,7 +376,7 @@ function setupEnemy() {
   enemyHp = enemy.hp;
   enemyNameLabel.textContent = enemy.name;
   enemyNameLabel.style.color = enemy.color;
-  enemySprite.style.background = enemy.color;
+  enemySprite.style.backgroundColor = enemy.color;
   buildBar(enemyHpBar, enemy.color, enemy.hp);
 }
 

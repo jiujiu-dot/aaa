@@ -1316,7 +1316,11 @@ main h1#page-title {
 }
 
 .fighter-enemy .fighter-sprite {
-  background: #6aa7f0;
+  background-color: #6aa7f0;
+  background-image: url("assets/BUG.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
   transition: background-color 300ms ease;
 }
 
