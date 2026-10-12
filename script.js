@@ -1,6 +1,16 @@
-const MEMORIZE_MS = 3000;
 const GUESS_MS = 10000;
 const MAX_HP = 10;
+const HP_PLAYER = "#e8639f";
+const HP_ENEMY = "#6aa7f0";
+const HP_TRACK = "#cfcdc4";
+const HEAL_ON_DEFEAT = 2;
+const ENEMY_PAUSE_MS = 1000;
+
+const ENEMIES = [
+  { name: "Slime", hp: 8, min: 1, max: 2, color: "#6aa7f0", memorizeMs: 3000 },
+  { name: "Sprout", hp: 10, min: 1, max: 4, color: "#7fd400", memorizeMs: 2500 },
+  { name: "Boss Bloom", hp: 12, min: 2, max: 5, color: "#e8639f", memorizeMs: 2000 },
+];
 
 const swatch = document.getElementById("swatch");
 const memorizeTime = document.getElementById("memorize-time");
@@ -22,6 +32,8 @@ const dangerVignette = document.getElementById("danger-vignette");
 const roundLabel = document.getElementById("round-label");
 const enemyFighter = document.querySelector(".fighter-enemy");
 const playerSprite = document.getElementById("player-sprite");
+const enemySprite = document.getElementById("enemy-sprite");
+const enemyNameLabel = document.getElementById("enemy-name");
 const colorPanel = document.querySelector(".color-panel");
 const panelHandle = document.getElementById("panel-handle");
 const sliders = {
@@ -36,12 +48,14 @@ const labels = {
 };
 
 let playerHp = MAX_HP;
-let enemyHp = MAX_HP;
+let enemyIndex = 0;
+let enemyHp = ENEMIES[0].hp;
 let guessing = false;
 let target = [0, 0, 0];
 let countdownInterval = null;
 let enemyTimeout = null;
 let guessTimeout = null;
+let beginGuessTimeout = null;
 let introTimers = [];
 let shakeTimer = null;
 let flashTimer = null;
@@ -49,6 +63,10 @@ let round = 0;
 let dropTimers = [];
 let dropItem = null;
 let dropShadow = null;
+
+function currentEnemy() {
+  return ENEMIES[enemyIndex];
+}
 
 
 function hsbToCss(h, s, b) {
@@ -116,7 +134,8 @@ function buildWavePath() {
   return `M ${points.join(" L ")}`;
 }
 
-function buildBar(bar) {
+function buildBar(bar, color, maxHp) {
+  const max = maxHp || MAX_HP;
   bar.replaceChildren();
   const d = buildWavePath();
   const clipId = `clip-${bar.id}`;
@@ -142,7 +161,7 @@ function buildBar(bar) {
   const track = document.createElementNS(SVG_NS, "path");
   track.setAttribute("d", d);
   track.setAttribute("fill", "none");
-  track.setAttribute("stroke", "#cfcdc4");
+  track.setAttribute("stroke", HP_TRACK);
   track.setAttribute("stroke-width", "3");
   track.setAttribute("stroke-linecap", "round");
   track.setAttribute("stroke-linejoin", "round");
@@ -150,7 +169,7 @@ function buildBar(bar) {
   const fill = document.createElementNS(SVG_NS, "path");
   fill.setAttribute("d", d);
   fill.setAttribute("fill", "none");
-  fill.setAttribute("stroke", bar.id === "player-hp" ? "#f13278" : "#18b9d7");
+  fill.setAttribute("stroke", color || (bar.id === "player-hp" ? HP_PLAYER : HP_ENEMY));
   fill.setAttribute("stroke-width", "4");
   fill.setAttribute("stroke-linecap", "round");
   fill.setAttribute("stroke-linejoin", "round");
@@ -161,15 +180,16 @@ function buildBar(bar) {
 }
 
 function renderHp() {
-  setBarWidth(playerHpBar, playerHp);
-  setBarWidth(enemyHpBar, enemyHp);
+  setBarWidth(playerHpBar, playerHp, MAX_HP);
+  setBarWidth(enemyHpBar, enemyHp, currentEnemy().hp);
   dangerVignette.classList.toggle("active", playerHp < 5);
 }
 
-function setBarWidth(bar, hp) {
+function setBarWidth(bar, hp, maxHp) {
   const rect = bar.querySelector(".hp-clip");
   if (rect) {
-    rect.setAttribute("width", String(250 * hp / MAX_HP));
+    const max = maxHp || MAX_HP;
+    rect.setAttribute("width", String(250 * Math.max(0, hp) / max));
   }
 }
 
@@ -346,17 +366,45 @@ function runIntro(onDone) {
   }, INTRO_STEPS.length * INTRO_STEP_MS));
 }
 
+function clearBeginGuessTimer() {
+  clearTimeout(beginGuessTimeout);
+  beginGuessTimeout = null;
+}
+
+function setupEnemy() {
+  const enemy = currentEnemy();
+  enemyHp = enemy.hp;
+  enemyNameLabel.textContent = enemy.name;
+  enemyNameLabel.style.color = enemy.color;
+  enemySprite.style.background = enemy.color;
+  buildBar(enemyHpBar, enemy.color, enemy.hp);
+}
+
+function nextEnemy() {
+  enemyIndex += 1;
+  setupEnemy();
+  renderHp();
+  info.textContent = `${currentEnemy().name} appears!`;
+  button.disabled = true;
+  enemyTimeout = setTimeout(() => {
+    enemyTimeout = null;
+    startRound();
+  }, ENEMY_PAUSE_MS);
+}
+
 function resetBattle() {
   clearIntroTimers();
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
   clearGuessTimer();
+  clearBeginGuessTimer();
   clearShake();
   clearFlash();
   clearFloats();
   clearDropItem();
   playerHp = MAX_HP;
-  enemyHp = MAX_HP;
+  enemyIndex = 0;
+  setupEnemy();
   renderHp();
   setRound(0);
 }
@@ -393,12 +441,14 @@ function resetToIdle() {
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
   clearGuessTimer();
+  clearBeginGuessTimer();
   clearShake();
   clearFlash();
   clearFloats();
   clearDropItem();
   playerHp = MAX_HP;
-  enemyHp = MAX_HP;
+  enemyIndex = 0;
+  setupEnemy();
   renderHp();
   round = 0;
   roundLabel.textContent = "round 1";
@@ -419,6 +469,7 @@ function endGame(result, message) {
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
   clearGuessTimer();
+  clearBeginGuessTimer();
   clearIntroTimers();
   clearShake();
   clearFlash();
@@ -442,10 +493,12 @@ function startRound() {
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
   clearGuessTimer();
+  clearBeginGuessTimer();
   resultSwatches.hidden = true;
   swatch.hidden = false;
   memorizeTime.hidden = false;
-  let millisecondsRemaining = MEMORIZE_MS;
+  const memorizeMs = currentEnemy().memorizeMs;
+  let millisecondsRemaining = memorizeMs;
   memorizeTime.textContent = (millisecondsRemaining / 1000).toFixed(1);
   clearInterval(countdownInterval);
   countdownInterval = setInterval(() => {
@@ -466,12 +519,13 @@ function startRound() {
   ];
   guessing = false;
   swatch.style.background = hsbToCss(...target);
-  info.textContent = "memorize!";
+  info.textContent = `${currentEnemy().name} appears!`;
   button.disabled = true;
-  setTimeout(beginGuess, MEMORIZE_MS);
+  beginGuessTimeout = setTimeout(beginGuess, memorizeMs);
 }
 
 function beginGuess() {
+  clearBeginGuessTimer();
   clearInterval(countdownInterval);
   countdownInterval = null;
   sliders.hue.value = 0;
@@ -488,7 +542,8 @@ function beginGuess() {
 }
 
 function enemyAttack() {
-  const damage = 1 + Math.floor(Math.random() * 4);
+  const enemy = currentEnemy();
+  const damage = enemy.min + Math.floor(Math.random() * (enemy.max - enemy.min + 1));
   playerHp = Math.max(0, playerHp - damage);
   renderHp();
   shakeArena(damage);
@@ -502,6 +557,49 @@ function enemyAttack() {
   button.textContent = "una una";
   button.disabled = false;
   button.onclick = startRound;
+}
+
+function defeatEnemy(score, damage, crit, timedOut) {
+  clearGuessTimer();
+  clearBeginGuessTimer();
+  clearTimeout(enemyTimeout);
+  enemyTimeout = null;
+  memorizeTime.hidden = true;
+  button.disabled = true;
+  guessing = false;
+  setSlidersDisabled(true);
+  guessColor.style.backgroundColor = hsbToCss(...getGuess());
+  targetColor.style.backgroundColor = hsbToCss(...target);
+  swatch.hidden = true;
+  resultSwatches.hidden = false;
+
+  playerHp = Math.min(MAX_HP, playerHp + HEAL_ON_DEFEAT);
+  renderHp();
+
+  const hitMessage = `${timedOut ? "Time up. " : ""}${crit ? "CRIT! " : ""}Score: ${score}. You hit for ${damage}.`;
+
+  if (enemyIndex >= ENEMIES.length - 1) {
+    endGame("win", `${hitMessage} ${currentEnemy().name} defeated. You win!`);
+    return;
+  }
+
+  info.textContent = `${currentEnemy().name} defeated! ${hitMessage}`;
+  button.textContent = "next";
+  button.disabled = false;
+  button.onclick = () => {
+    clearTimeout(enemyTimeout);
+    enemyTimeout = null;
+    button.onclick = null;
+    nextEnemy();
+  };
+
+  enemyTimeout = setTimeout(() => {
+    enemyTimeout = null;
+    if (button.onclick) {
+      button.onclick = null;
+      nextEnemy();
+    }
+  }, ENEMY_PAUSE_MS);
 }
 
 function submit(timedOut = false) {
@@ -531,7 +629,7 @@ function submit(timedOut = false) {
   resultSwatches.hidden = false;
 
   if (enemyHp <= 0) {
-    endGame("win", `${crit ? "CRIT! " : ""}Score: ${score}. You hit for ${damage}. You win.`);
+    defeatEnemy(score, damage, crit, timedOut);
     return;
   }
 
@@ -542,8 +640,8 @@ function submit(timedOut = false) {
 }
 
 setSlidersDisabled(true);
-buildBar(playerHpBar);
-buildBar(enemyHpBar);
+buildBar(playerHpBar, HP_PLAYER, MAX_HP);
+setupEnemy();
 renderHp();
 updateSliderTracks();
 Object.values(sliders).forEach(s => s.addEventListener("input", updateSwatch));

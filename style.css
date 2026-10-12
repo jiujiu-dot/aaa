@@ -105,7 +105,6 @@ body::before {
   aspect-ratio: 1;
   border-radius: 50%;
   background: #35b873;
-  box-shadow: 0 0 0 3px rgba(53, 184, 115, 0.15);
 }
 
 .header-number {
@@ -229,7 +228,7 @@ h1 span {
   border: 1px solid rgba(255, 255, 255, 0.88);
   border-radius: 22px;
   background: rgba(255, 250, 246, 0.62);
-  box-shadow: 0 24px 70px rgba(165, 105, 127, 0.16), inset 0 1px rgba(255, 255, 255, 0.92);
+  box-shadow: none;
 }
 
 .panel-header {
@@ -320,7 +319,6 @@ h2 {
   border: 1px solid rgba(140, 92, 111, 0.18);
   border-radius: 999px;
   background: rgba(255, 250, 246, 0.94);
-  box-shadow: 0 4px 14px rgba(140, 92, 111, 0.12);
   color: var(--coral);
   font-family: "VT323", monospace;
   font-size: 24px;
@@ -376,7 +374,7 @@ h2 {
   min-height: 0;
   border: 1px solid rgba(80, 62, 68, 0.16);
   border-radius: 14px;
-  box-shadow: inset 0 1px rgba(255, 255, 255, 0.35), 0 6px 16px rgba(80, 62, 68, 0.12);
+  box-shadow: none;
 }
 
 #swatch.is-playing {
@@ -801,7 +799,7 @@ body::before {
   border: 1px solid rgba(43, 50, 59, 0.1);
   border-radius: 10px;
   background: rgba(249, 250, 250, 0.98);
-  box-shadow: 0 14px 40px rgba(45, 55, 68, 0.08);
+  box-shadow: none;
 }
 
 .game-grid {
@@ -840,7 +838,6 @@ body::before {
   height: 30px;
   border-color: rgba(43, 50, 59, 0.12);
   background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 2px 8px rgba(43, 50, 59, 0.1);
   color: #343a42;
   font-family: var(--mono);
   font-size: 16px;
@@ -867,7 +864,7 @@ body::before {
   flex: 0 1 auto;
   border: 0;
   border-radius: 50%;
-  box-shadow: 0 10px 28px rgba(44, 53, 63, 0.12), inset 0 1px 2px rgba(255, 255, 255, 0.46);
+  box-shadow: none;
 }
 
 .game-status {
@@ -928,7 +925,6 @@ body::before {
   margin-top: -5px;
   border: 2px solid white;
   background: #3e4650;
-  box-shadow: 0 1px 4px rgba(30, 40, 50, 0.32);
 }
 
 .slider-control input::-moz-range-thumb {
@@ -936,13 +932,11 @@ body::before {
   height: 12px;
   border: 2px solid white;
   background: #3e4650;
-  box-shadow: 0 1px 4px rgba(30, 40, 50, 0.32);
 }
 
 #hue::-webkit-slider-thumb,
 #hue::-moz-range-thumb {
   background: white;
-  box-shadow: 0 1px 5px rgba(30, 40, 50, 0.34);
 }
 
 #button {
@@ -952,7 +946,6 @@ body::before {
   border: 0;
   border-radius: 6px;
   background: #0481c9;
-  box-shadow: 0 4px 10px rgba(8, 127, 196, 0.18);
   color: white;
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
   font-size: 14px;
@@ -1278,7 +1271,7 @@ main h1#page-title {
   overflow: hidden;
   border: 3px solid #252a31;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.55);
+  background: #fdf1f5;
 }
 
 .hp-corner {
@@ -1323,7 +1316,8 @@ main h1#page-title {
 }
 
 .fighter-enemy .fighter-sprite {
-  background: #18b9d7;
+  background: #6aa7f0;
+  transition: background-color 300ms ease;
 }
 
 .fighter-name {
@@ -1334,6 +1328,11 @@ main h1#page-title {
   text-transform: uppercase;
 }
 
+#enemy-name {
+  color: #6aa7f0;
+  transition: color 300ms ease;
+}
+
 .color-panel {
   position: absolute;
   left: 16px;
@@ -1341,7 +1340,7 @@ main h1#page-title {
   width: min(560px, calc(100% - 32px));
   background: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
-  box-shadow: 0 14px 34px rgba(37, 42, 49, 0.18);
+  box-shadow: none;
 }
 
 .color-panel .game-grid {
@@ -1474,7 +1473,7 @@ main h1#page-title {
 }
 
 .float-num.dmg {
-  color: #f13278;
+  color: #e8639f;
 }
 
 .float-num.miss {
@@ -1734,7 +1733,6 @@ main h1#page-title {
 .float-num.crit {
   color: #ffd34d;
   font-size: 58px;
-  text-shadow: 0 2px 0 rgba(90, 62, 0, 0.35);
 }
 
 @keyframes hp-flash-white {
@@ -2005,7 +2003,7 @@ main h1#page-title {
 .color-panel.dragging {
   z-index: 30;
   cursor: grabbing;
-  box-shadow: 0 10px 22px rgba(37, 42, 49, 0.16);
+  box-shadow: none;
 }
 
 .color-panel.dragging .panel-handle,
@@ -2040,6 +2038,15 @@ body.dragging #swatch {
   .color-panel.dragging {
     z-index: auto;
     cursor: auto;
-    box-shadow: 0 14px 34px rgba(37, 42, 49, 0.18);
+    box-shadow: none;
   }
+}
+
+/* ===== hp label colors ===== */
+.hp-corner-left .hp-name {
+  color: #e8639f;
+}
+
+.hp-corner-right .hp-name {
+  color: #6aa7f0;
 }
