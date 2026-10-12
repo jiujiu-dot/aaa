@@ -379,10 +379,12 @@ function setupEnemy() {
 
 function nextEnemy() {
   enemyIndex += 1;
+  clearFloats();
   setupEnemy();
   renderHp();
   info.textContent = `${currentEnemy().name} appears!`;
   button.disabled = true;
+  button.onclick = null;
   enemyTimeout = setTimeout(() => {
     enemyTimeout = null;
     startRound();
@@ -401,9 +403,21 @@ function resetBattle() {
   clearDropItem();
   playerHp = MAX_HP;
   enemyIndex = 0;
+  guessing = false;
   setupEnemy();
   renderHp();
-  setRound(0);
+  round = 0;
+  roundLabel.textContent = "round 1";
+  resultSwatches.hidden = true;
+  swatch.hidden = false;
+  swatch.style.background = "";
+  swatch.classList.remove("is-playing");
+  memorizeTime.hidden = true;
+  info.textContent = `${currentEnemy().name} appears!`;
+  setSlidersDisabled(true);
+  button.textContent = "Start";
+  button.disabled = true;
+  button.onclick = null;
 }
 
 function startFight() {

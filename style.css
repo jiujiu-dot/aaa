@@ -1318,13 +1318,9 @@ main h1#page-title {
 }
 
 .fighter-enemy .fighter-sprite {
-  width: min(960px, 88vw, calc((min(78vh, 720px) - 170px) * 1.75));
-  height: auto;
-  aspect-ratio: 7 / 4;
   background-color: transparent;
-  background-image: url("assets/BUG.png");
-  background-position: center bottom;
   background-repeat: no-repeat;
+  background-position: center bottom;
   background-size: contain;
 }
 
@@ -1524,6 +1520,28 @@ main h1#page-title {
 
 .fighter-player .fighter-sprite--animated.hurt {
   animation-name: hurt-shake, player-frames;
+}
+
+/* ===== enemy sprite frames ===== */
+@keyframes enemy-frames {
+  0%,
+  49.999% {
+    background-image: url("assets/usagi1.png");
+  }
+
+  50%,
+  100% {
+    background-image: url("assets/usagi2.png");
+  }
+}
+
+.fighter-enemy .fighter-sprite--animated {
+  background-color: transparent;
+  background-image: url("assets/usagi1.png");
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  animation: enemy-frames 1.2s steps(1, end) infinite;
 }
 
 /* ===== intro overlay ===== */
