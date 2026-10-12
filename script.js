@@ -1,4 +1,5 @@
 const MEMORIZE_MS = 3000;
+const GUESS_MS = 10000;
 const MAX_HP = 10;
 
 const swatch = document.getElementById("swatch");
@@ -27,6 +28,7 @@ let guessing = false;
 let target = [0, 0, 0];
 let countdownInterval = null;
 let enemyTimeout = null;
+let guessTimeout = null;
 
 
 function hsbToCss(h, s, b) {
@@ -101,9 +103,39 @@ function renderHp() {
   renderHpBar(enemyHpBar, enemyHp);
 }
 
+function clearGuessTimer() {
+  clearTimeout(guessTimeout);
+  guessTimeout = null;
+  clearInterval(countdownInterval);
+  countdownInterval = null;
+}
+
+function startGuessTimer() {
+  let millisecondsRemaining = GUESS_MS;
+  memorizeTime.hidden = false;
+  memorizeTime.textContent = (millisecondsRemaining / 1000).toFixed(1);
+  clearInterval(countdownInterval);
+  countdownInterval = setInterval(() => {
+    millisecondsRemaining = Math.max(0, millisecondsRemaining - 400);
+    if (millisecondsRemaining > 0) {
+      memorizeTime.textContent = (millisecondsRemaining / 1000).toFixed(1);
+    } else {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }, 400);
+  clearTimeout(guessTimeout);
+  guessTimeout = setTimeout(() => {
+    if (guessing) {
+      submit(true);
+    }
+  }, GUESS_MS);
+}
+
 function resetBattle() {
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
+  clearGuessTimer();
   playerHp = MAX_HP;
   enemyHp = MAX_HP;
   renderHp();
@@ -117,6 +149,7 @@ function playAgain() {
 function endGame(message) {
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
+  clearGuessTimer();
   guessing = false;
   setSlidersDisabled(true);
   info.textContent = message;
@@ -128,6 +161,7 @@ function endGame(message) {
 function startRound() {
   clearTimeout(enemyTimeout);
   enemyTimeout = null;
+  clearGuessTimer();
   resultSwatches.hidden = true;
   swatch.hidden = false;
   memorizeTime.hidden = false;
@@ -158,7 +192,6 @@ function startRound() {
 }
 
 function beginGuess() {
-  memorizeTime.hidden = true;
   clearInterval(countdownInterval);
   countdownInterval = null;
   sliders.hue.value = 0;
@@ -171,6 +204,7 @@ function beginGuess() {
   button.textContent = "submit";
   button.disabled = false;
   button.onclick = submit;
+  startGuessTimer();
 }
 
 function enemyAttack() {
@@ -189,7 +223,11 @@ function enemyAttack() {
   button.onclick = startRound;
 }
 
-function submit() {
+function submit(timedOut = false) {
+  timedOut = timedOut === true;
+  clearGuessTimer();
+  memorizeTime.hidden = true;
+  button.disabled = true;
   guessing = false;
   setSlidersDisabled(true);
   const guess = getGuess();
@@ -207,7 +245,7 @@ function submit() {
     return;
   }
 
-  info.textContent = `Score: ${score}. You hit for ${damage}.`;
+  info.textContent = `${timedOut ? "Time up. " : ""}Score: ${score}. You hit for ${damage}.`;
   button.textContent = "enemy turn";
   button.disabled = true;
   enemyTimeout = setTimeout(enemyAttack, 900);
