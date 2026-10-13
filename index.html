@@ -86,19 +86,19 @@
       <div id="danger-vignette" aria-hidden="true"></div>
 
       <video id="lose-video" src="assets/lose animation.mp4" preload="auto" playsinline hidden></video>
+
+      <div id="end-overlay" hidden>
+        <h2 id="end-title"></h2>
+        <div class="end-actions">
+          <button id="end-play-again" type="button">play again</button>
+          <button id="end-leave" type="button">leave</button>
+        </div>
+      </div>
     </section>
   </main>
 
   <div id="intro-overlay" hidden>
     <span id="intro-text" aria-live="assertive"></span>
-  </div>
-
-  <div id="end-overlay" hidden>
-    <h2 id="end-title"></h2>
-    <div class="end-actions">
-      <button id="end-play-again" type="button">play again</button>
-      <button id="end-leave" type="button">leave</button>
-    </div>
   </div>
 
   <script src="script.js"></script>
