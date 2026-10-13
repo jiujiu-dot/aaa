@@ -21,7 +21,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   color: var(--ink);
-  background-color: #d8fcad;
+  background-color: #a8f549;
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
@@ -1272,12 +1272,12 @@ main h1#page-title {
 /* ===== battle arena ===== */
 .battle-arena {
   position: relative;
-  --fighter-left: 24%;
-  --fighter-gap: 400px;
-  --fighter-size: 140px;
-  --enemy-fighter-size: 160px;
+  --fighter-left: 2.5%;
+  --fighter-gap: clamp(280px, 44vw, 480px);
+  --fighter-size: clamp(200px, 33vw, 420px);
+  --enemy-fighter-size: clamp(215px, 35vw, 440px);
   width: 100%;
-  height: clamp(580px, 78vh, 720px);
+  height: clamp(700px, 86vh, 820px);
   overflow: hidden;
   border: 3px solid #252a31;
   border-radius: 14px;
@@ -1378,6 +1378,8 @@ main h1#page-title {
     grid-template-columns: 1fr 1fr;
     height: auto;
     overflow: visible;
+    --fighter-size: clamp(150px, 40vw, 300px);
+    --enemy-fighter-size: clamp(160px, 44vw, 320px);
   }
 
   .hp-corner,
@@ -2083,9 +2085,9 @@ body.dragging #swatch {
 
 /* ===== hp label colors ===== */
 .hp-corner-left .hp-name {
-  color: #e8639f;
+  color: #1a2b6d;
 }
 
 .hp-corner-right .hp-name {
-  color: #6aa7f0;
+  color: #252a31;
 }
