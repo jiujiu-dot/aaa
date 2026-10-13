@@ -1108,8 +1108,6 @@ body {
 
 main.page-shell {
   position: relative;
-  z-index: 1;
-  isolation: isolate;
   width: min(1240px, calc(100% - 96px));
   min-height: 100vh;
   gap: 16px;
@@ -1350,10 +1348,12 @@ main h1#page-title {
 }
 
 .color-panel {
-  position: absolute;
-  left: 16px;
-  bottom: 16px;
-  width: min(500px, calc(100% - 32px));
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: 560px;
+  max-width: calc(100vw - 16px);
   background: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
   box-shadow: none;
@@ -1383,15 +1383,9 @@ main h1#page-title {
   }
 
   .hp-corner,
-  .fighter,
-  .color-panel {
+  .fighter {
     position: static;
     width: auto;
-  }
-
-  .color-panel {
-    grid-column: 1 / -1;
-    width: 100%;
   }
 
   .color-panel .game-grid {
@@ -1964,13 +1958,6 @@ main h1#page-title {
   .fighter-enemy {
     bottom: 150px;
   }
-
-  .color-panel {
-    left: auto;
-    right: 16px;
-    bottom: 16px;
-    margin: 0;
-  }
 }
 
 .result-color {
@@ -2042,7 +2029,6 @@ main h1#page-title {
 }
 
 .color-panel.dragging {
-  z-index: 30;
   cursor: grabbing;
   box-shadow: none;
 }
@@ -2072,6 +2058,14 @@ body.dragging #swatch {
 }
 
 @media (max-width: 800px) {
+  .color-panel {
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin: 12px auto;
+    transform: none;
+  }
+
   .panel-handle {
     display: none;
   }

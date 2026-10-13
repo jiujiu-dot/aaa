@@ -42,47 +42,6 @@
         <div id="enemy-sprite" class="fighter-sprite fighter-sprite--animated"></div>
       </div>
 
-      <section class="color-panel" aria-label="Color game">
-        <div class="panel-handle" id="panel-handle" aria-label="Drag to move"><span class="panel-grip"></span><span class="panel-title">colors</span></div>
-        <div class="game-grid">
-          <section class="specimen" aria-label="Color swatch">
-            <div class="specimen-stage">
-              <div id="swatch" role="img" aria-label="Animated character and target color"></div>
-              <span id="memorize-time" class="memorize-time" hidden aria-live="polite"></span>
-              <div id="result-swatches" class="result-swatches" hidden>
-                <div class="result-swatch">
-                  <span>Your color</span>
-                  <div id="guess-color" class="result-color" role="img" aria-label="Your color"></div>
-                </div>
-                <div class="result-swatch">
-                  <span>Target color</span>
-                  <div id="target-color" class="result-color" role="img" aria-label="Target color"></div>
-                </div>
-              </div>
-            </div>
-            <p id="info" class="game-status" aria-live="polite">Press Start</p>
-          </section>
-
-          <section class="controls" aria-label="Color controls">
-            <div id="sliders">
-              <label class="slider-control" for="hue">
-                <span class="slider-heading"><span>Hue:</span> <output id="hueVal" for="hue">0</output></span>
-                <input type="range" id="hue" min="0" max="360" value="0">
-              </label>
-              <label class="slider-control" for="sat">
-                <span class="slider-heading"><span>Saturation:</span> <output id="satVal" for="sat">50</output></span>
-                <input type="range" id="sat" min="0" max="100" value="50">
-              </label>
-              <label class="slider-control" for="bri">
-                <span class="slider-heading"><span>Brightness:</span> <output id="briVal" for="bri">50</output></span>
-                <input type="range" id="bri" min="0" max="100" value="50">
-              </label>
-            </div>
-            <button id="button" type="button">Start</button>
-          </section>
-        </div>
-      </section>
-
       <div id="danger-vignette" aria-hidden="true"></div>
 
       <video id="lose-video" src="assets/lose animation.mp4" preload="auto" playsinline hidden></video>
@@ -100,6 +59,47 @@
   <div id="intro-overlay" hidden>
     <span id="intro-text" aria-live="assertive"></span>
   </div>
+
+  <section class="color-panel" aria-label="Color game">
+    <div class="panel-handle" id="panel-handle" aria-label="Drag to move"><span class="panel-grip"></span><span class="panel-title">colors</span></div>
+    <div class="game-grid">
+      <section class="specimen" aria-label="Color swatch">
+        <div class="specimen-stage">
+          <div id="swatch" role="img" aria-label="Animated character and target color"></div>
+          <span id="memorize-time" class="memorize-time" hidden aria-live="polite"></span>
+          <div id="result-swatches" class="result-swatches" hidden>
+            <div class="result-swatch">
+              <span>Your color</span>
+              <div id="guess-color" class="result-color" role="img" aria-label="Your color"></div>
+            </div>
+            <div class="result-swatch">
+              <span>Target color</span>
+              <div id="target-color" class="result-color" role="img" aria-label="Target color"></div>
+            </div>
+          </div>
+        </div>
+        <p id="info" class="game-status" aria-live="polite">Press Start</p>
+      </section>
+
+      <section class="controls" aria-label="Color controls">
+        <div id="sliders">
+          <label class="slider-control" for="hue">
+            <span class="slider-heading"><span>Hue:</span> <output id="hueVal" for="hue">0</output></span>
+            <input type="range" id="hue" min="0" max="360" value="0">
+          </label>
+          <label class="slider-control" for="sat">
+            <span class="slider-heading"><span>Saturation:</span> <output id="satVal" for="sat">50</output></span>
+            <input type="range" id="sat" min="0" max="100" value="50">
+          </label>
+          <label class="slider-control" for="bri">
+            <span class="slider-heading"><span>Brightness:</span> <output id="briVal" for="bri">50</output></span>
+            <input type="range" id="bri" min="0" max="100" value="50">
+          </label>
+        </div>
+        <button id="button" type="button">Start</button>
+      </section>
+    </div>
+  </section>
 
   <script src="script.js"></script>
 </body>

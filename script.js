@@ -421,9 +421,6 @@ function resetBattle() {
 
 function startFight() {
   hideEndOverlay();
-  if (panelOutsideArena()) {
-    resetPanelPosition();
-  }
   resetBattle();
   runIntro(startRound);
 }
@@ -698,15 +695,29 @@ endPlayAgain.onclick = () => {
 };
 endLeave.onclick = resetToIdle;
 
-/* ===== draggable color panel ===== */
+/* ===== free-floating color panel ===== */
+const PANEL_SPAWN_OUTSET = 24;
+
 let panelDrag = null;
 let panelRaf = null;
-let panelPointerId = null;
 let panelPointer = { x: 0, y: 0 };
 let panelOffset = { x: 0, y: 0 };
+let panelMoved = false;
 
 function panelIsDraggable() {
   return !window.matchMedia("(max-width: 800px)").matches;
+}
+
+function panelViewportSize() {
+  const root = document.documentElement;
+  return { width: root.clientWidth, height: root.clientHeight };
+}
+
+function clampAxis(value, min, max) {
+  if (max < min) {
+    return min;
+  }
+  return Math.min(Math.max(value, min), max);
 }
 
 function applyPanelTransform() {
@@ -714,16 +725,88 @@ function applyPanelTransform() {
     `translate3d(${panelOffset.x}px, ${panelOffset.y}px, 0)`;
 }
 
-function clampPanel() {
+/* The only layout read: everything else works off these numbers. */
+function panelMeasure() {
+  const rect = colorPanel.getBoundingClientRect();
+  return {
+    width: rect.width,
+    height: rect.height,
+    left: rect.left,
+    top: rect.top,
+    baseLeft: rect.left - panelOffset.x,
+    baseTop: rect.top - panelOffset.y,
+  };
+}
+
+/* Panel stays fully inside the browser window, never off screen. */
+function panelViewportBounds(measure) {
+  const viewport = panelViewportSize();
+  return {
+    minX: -measure.baseLeft,
+    maxX: viewport.width - measure.width - measure.baseLeft,
+    minY: -measure.baseTop,
+    maxY: viewport.height - measure.height - measure.baseTop,
+  };
+}
+
+function setPanelPosition(x, y) {
+  const bounds = panelViewportBounds(panelMeasure());
+  panelOffset.x = clampAxis(x, bounds.minX, bounds.maxX);
+  panelOffset.y = clampAxis(y, bounds.minY, bounds.maxY);
+  applyPanelTransform();
+}
+
+/* Bottom-left corner of the arena, hanging off the frame. */
+function panelSpawnPosition() {
+  const arenaRect = battleArena.getBoundingClientRect();
+  const measure = panelMeasure();
+  const viewport = panelViewportSize();
+  return {
+    x: clampAxis(
+      arenaRect.left - PANEL_SPAWN_OUTSET,
+      0,
+      Math.max(0, viewport.width - measure.width)
+    ),
+    y: clampAxis(
+      arenaRect.bottom - measure.height + PANEL_SPAWN_OUTSET,
+      0,
+      Math.max(0, viewport.height - measure.height)
+    ),
+  };
+}
+
+function placePanelAtSpawn() {
+  const spawn = panelSpawnPosition();
+  setPanelPosition(spawn.x, spawn.y);
+}
+
+function syncPanelPosition() {
+  if (!panelIsDraggable()) {
+    panelDrag = null;
+    panelOffset.x = 0;
+    panelOffset.y = 0;
+    colorPanel.style.transform = "";
+    return;
+  }
+  if (panelMoved) {
+    setPanelPosition(panelOffset.x, panelOffset.y);
+  } else {
+    placePanelAtSpawn();
+  }
+}
+
+function updatePanelFromPointer() {
   if (!panelDrag) {
     return;
   }
-  const nextX = Math.min(
-    Math.max(panelPointer.x - panelDrag.grabX - panelDrag.baseLeft, panelDrag.minX),
+  const nextX = clampAxis(
+    panelPointer.x - panelDrag.grabX - panelDrag.baseLeft,
+    panelDrag.minX,
     panelDrag.maxX
   );
-  const nextY = Math.min(
-    Math.max(panelPointer.y - panelDrag.grabY - panelDrag.baseTop, panelDrag.minY),
+  const nextY = clampAxis(
+    panelPointer.y - panelDrag.grabY - panelDrag.baseTop,
+    panelDrag.minY,
     panelDrag.maxY
   );
   if (nextX === panelOffset.x && nextY === panelOffset.y) {
@@ -736,68 +819,13 @@ function clampPanel() {
 
 function panelFrame() {
   panelRaf = null;
-  clampPanel();
+  updatePanelFromPointer();
 }
 
 function schedulePanelFrame() {
   if (panelRaf === null) {
     panelRaf = requestAnimationFrame(panelFrame);
   }
-}
-
-function resetPanelPosition() {
-  if (panelRaf !== null) {
-    cancelAnimationFrame(panelRaf);
-    panelRaf = null;
-  }
-  if (panelPointerId !== null && panelHandle.hasPointerCapture(panelPointerId)) {
-    panelHandle.releasePointerCapture(panelPointerId);
-  }
-  panelDrag = null;
-  panelPointerId = null;
-  window.removeEventListener("pointermove", onPanelPointerMove);
-  window.removeEventListener("pointerup", onPanelPointerEnd);
-  window.removeEventListener("pointercancel", onPanelPointerEnd);
-  panelOffset.x = 0;
-  panelOffset.y = 0;
-  colorPanel.style.transform = "";
-  colorPanel.classList.remove("dragging");
-  document.body.classList.remove("dragging");
-}
-
-function panelOutsideArena() {
-  if (panelOffset.x === 0 && panelOffset.y === 0) {
-    return false;
-  }
-  const arenaRect = battleArena.getBoundingClientRect();
-  const rect = colorPanel.getBoundingClientRect();
-  return rect.left < arenaRect.left ||
-    rect.top < arenaRect.top ||
-    rect.right > arenaRect.right ||
-    rect.bottom > arenaRect.bottom;
-}
-
-function clampPanelToArena() {
-  if (!panelIsDraggable()) {
-    resetPanelPosition();
-    return;
-  }
-  if (panelOffset.x === 0 && panelOffset.y === 0) {
-    return;
-  }
-  const arenaRect = battleArena.getBoundingClientRect();
-  const rect = colorPanel.getBoundingClientRect();
-  const baseLeft = rect.left - panelOffset.x;
-  const baseTop = rect.top - panelOffset.y;
-  const minX = arenaRect.left - baseLeft;
-  const maxX = arenaRect.right - rect.width - baseLeft;
-  const minY = arenaRect.top - baseTop;
-  const maxY = arenaRect.bottom - rect.height - baseTop;
-  panelPointer.x = baseLeft + panelOffset.x;
-  panelPointer.y = baseTop + panelOffset.y;
-  panelDrag = { grabX: 0, grabY: 0, baseLeft, baseTop, minX, maxX, minY, maxY };
-  clampPanel();
-  panelDrag = null;
 }
 
 function onPanelPointerMove(event) {
@@ -809,7 +837,7 @@ function onPanelPointerMove(event) {
   schedulePanelFrame();
 }
 
-function onPanelPointerEnd(event) {
+function endPanelDrag(event) {
   if (!panelDrag) {
     return;
   }
@@ -817,57 +845,75 @@ function onPanelPointerEnd(event) {
     cancelAnimationFrame(panelRaf);
     panelRaf = null;
   }
-  clampPanel();
+  if (event) {
+    panelPointer.x = event.clientX;
+    panelPointer.y = event.clientY;
+  }
+  updatePanelFromPointer();
   panelDrag = null;
-  panelPointerId = null;
+  panelMoved = true;
   colorPanel.classList.remove("dragging");
   document.body.classList.remove("dragging");
-  window.removeEventListener("pointermove", onPanelPointerMove);
-  window.removeEventListener("pointerup", onPanelPointerEnd);
-  window.removeEventListener("pointercancel", onPanelPointerEnd);
-  if (panelHandle.hasPointerCapture(event.pointerId)) {
+  panelHandle.removeEventListener("pointermove", onPanelPointerMove);
+  panelHandle.removeEventListener("pointerup", onPanelPointerEnd);
+  panelHandle.removeEventListener("pointercancel", onPanelPointerEnd);
+  if (event && panelHandle.hasPointerCapture(event.pointerId)) {
     panelHandle.releasePointerCapture(event.pointerId);
   }
 }
 
+function onPanelPointerEnd(event) {
+  endPanelDrag(event);
+}
+
 panelHandle.addEventListener("pointerdown", event => {
-  if (!panelIsDraggable() || event.button !== 0) {
+  if (!panelIsDraggable() || event.button !== 0 || panelDrag) {
     return;
   }
   event.preventDefault();
 
-  const arenaRect = battleArena.getBoundingClientRect();
-  const rect = colorPanel.getBoundingClientRect();
-  const baseLeft = rect.left - panelOffset.x;
-  const baseTop = rect.top - panelOffset.y;
+  const measure = panelMeasure();
+  const bounds = panelViewportBounds(measure);
 
   panelPointer.x = event.clientX;
   panelPointer.y = event.clientY;
   panelDrag = {
-    grabX: event.clientX - rect.left,
-    grabY: event.clientY - rect.top,
-    baseLeft,
-    baseTop,
-    minX: arenaRect.left - baseLeft,
-    maxX: arenaRect.right - rect.width - baseLeft,
-    minY: arenaRect.top - baseTop,
-    maxY: arenaRect.bottom - rect.height - baseTop,
+    grabX: event.clientX - measure.left,
+    grabY: event.clientY - measure.top,
+    baseLeft: measure.baseLeft,
+    baseTop: measure.baseTop,
+    minX: bounds.minX,
+    maxX: bounds.maxX,
+    minY: bounds.minY,
+    maxY: bounds.maxY,
   };
-  panelPointerId = event.pointerId;
 
   colorPanel.classList.add("dragging");
   document.body.classList.add("dragging");
   panelHandle.setPointerCapture(event.pointerId);
-  window.addEventListener("pointermove", onPanelPointerMove);
-  window.addEventListener("pointerup", onPanelPointerEnd);
-  window.addEventListener("pointercancel", onPanelPointerEnd);
+  panelHandle.addEventListener("pointermove", onPanelPointerMove);
+  panelHandle.addEventListener("pointerup", onPanelPointerEnd);
+  panelHandle.addEventListener("pointercancel", onPanelPointerEnd);
 });
 
 panelHandle.addEventListener("dblclick", () => {
   if (!panelIsDraggable()) {
     return;
   }
-  resetPanelPosition();
+  if (panelRaf !== null) {
+    cancelAnimationFrame(panelRaf);
+    panelRaf = null;
+  }
+  panelDrag = null;
+  panelMoved = false;
+  colorPanel.classList.remove("dragging");
+  document.body.classList.remove("dragging");
+  placePanelAtSpawn();
 });
 
-window.addEventListener("resize", clampPanelToArena);
+window.addEventListener("resize", syncPanelPosition);
+window.addEventListener("load", syncPanelPosition);
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(syncPanelPosition);
+}
+syncPanelPosition();
