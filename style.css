@@ -21,7 +21,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   color: var(--ink);
-  background-color: #a8f549;
+  background-color: #d8fcad;
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
@@ -1024,6 +1024,11 @@ body {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+
+  body::before,
+  body::after {
+    animation: none !important;
+  }
 }
 
 .page-shell {
@@ -1116,7 +1121,7 @@ main.page-shell {
   z-index: 0;
   top: 0;
   left: 0;
-  display: block;
+  display: none;
   width: 100vw;
   height: 100vh;
   transform: none;
@@ -1184,7 +1189,7 @@ main h1#page-title {
   .explosion-frame--tall {
     top: 0;
     left: -15vw;
-    display: block;
+    display: none;
     width: 130vw;
     height: 100vh;
   }
@@ -1276,7 +1281,7 @@ main h1#page-title {
   overflow: hidden;
   border: 3px solid #252a31;
   border-radius: 14px;
-  background: #fdf1f5;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .hp-corner {
@@ -1932,7 +1937,7 @@ main h1#page-title {
 
 /* ===== arena scene: floor + standing fighters ===== */
 .battle-arena {
-  background: #fdf1f5;
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .battle-arena::before {
