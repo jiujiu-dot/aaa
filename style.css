@@ -21,7 +21,7 @@ body {
   margin: 0;
   overflow-x: hidden;
   color: var(--ink);
-  background-color: #a8f549;
+  background-color: #d4f7ab;
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
@@ -1270,12 +1270,12 @@ main h1#page-title {
 /* ===== battle arena ===== */
 .battle-arena {
   position: relative;
-  --fighter-left: 2.5%;
-  --fighter-gap: clamp(280px, 44vw, 480px);
-  --fighter-size: clamp(200px, 33vw, 420px);
-  --enemy-fighter-size: clamp(215px, 35vw, 440px);
+  --fighter-left: min(calc(2.5% + 270px), 31%);
+  --fighter-gap: clamp(220px, 30vw, 380px);
+  --fighter-size: clamp(170px, 25vw, 320px);
+  --enemy-fighter-size: clamp(195px, 28vw, 350px);
   width: 100%;
-  height: clamp(700px, 86vh, 820px);
+  height: clamp(620px, 80vh, 760px);
   overflow: hidden;
   border: 3px solid #252a31;
   border-radius: 14px;
@@ -1378,8 +1378,8 @@ main h1#page-title {
     grid-template-columns: 1fr 1fr;
     height: auto;
     overflow: visible;
-    --fighter-size: clamp(150px, 40vw, 300px);
-    --enemy-fighter-size: clamp(160px, 44vw, 320px);
+    --fighter-size: clamp(130px, 33vw, 220px);
+    --enemy-fighter-size: clamp(150px, 37vw, 250px);
   }
 
   .hp-corner,
@@ -1952,11 +1952,11 @@ main h1#page-title {
 @media (min-width: 801px) {
   .fighter {
     top: auto;
-    bottom: 150px;
+    bottom: 140px;
   }
 
   .fighter-enemy {
-    bottom: 150px;
+    bottom: 140px;
   }
 }
 
