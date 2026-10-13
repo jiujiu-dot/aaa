@@ -21,26 +21,50 @@ body {
   margin: 0;
   overflow-x: hidden;
   color: var(--ink);
-  background:
-    radial-gradient(ellipse at 10% 10%, rgba(255, 255, 255, 0.86), transparent 34%),
-    radial-gradient(ellipse at 95% 4%, rgba(255, 142, 183, 0.48), transparent 29%),
-    radial-gradient(ellipse at 88% 94%, rgba(82, 224, 211, 0.74), transparent 31%),
-    radial-gradient(ellipse at 49% 59%, rgba(193, 205, 255, 0.62), transparent 42%),
-    var(--paper);
+  background-color: #a8f549;
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
 }
 
-body::before {
+body::before,
+body::after {
   position: fixed;
   z-index: -1;
-  inset: 0;
-  background-image:
-    radial-gradient(rgba(24, 37, 33, 0.17) 0.65px, transparent 0.65px),
-    linear-gradient(90deg, transparent 49.9%, rgba(255, 255, 255, 0.24) 50%, transparent 50.1%);
-  background-size: 6px 6px, 100% 100%;
+  inset: -60px;
   content: "";
-  opacity: 0.2;
   pointer-events: none;
+  will-change: transform;
+}
+
+body::before {
+  background-image: radial-gradient(circle, #1a2b6d 0 2px, transparent 2.5px);
+  background-size: 32px 32px;
+  opacity: 0.55;
+  animation: drift-a 8s linear infinite;
+}
+
+body::after {
+  background-image: radial-gradient(circle, #1a2b6d 0 1.5px, transparent 2px);
+  background-size: 48px 48px;
+  background-position: 16px 16px;
+  opacity: 0.35;
+  animation: drift-b 12s linear infinite;
+}
+
+@keyframes drift-a {
+  to {
+    transform: translate3d(32px, 32px, 0);
+  }
+}
+
+@keyframes drift-b {
+  to {
+    transform: translate3d(-48px, 48px, 0);
+  }
+}
+
+body.dragging::before,
+body.dragging::after {
+  animation-play-state: paused;
 }
 
 .site-header {
@@ -136,19 +160,6 @@ body::before {
 body {
   color-scheme: light;
   color: var(--ink);
-  background:
-    radial-gradient(ellipse at 12% 14%, rgba(255, 255, 255, 0.9), transparent 34%),
-    radial-gradient(ellipse at 92% 12%, rgba(255, 191, 207, 0.72), transparent 33%),
-    radial-gradient(ellipse at 82% 94%, rgba(133, 214, 193, 0.7), transparent 34%),
-    linear-gradient(135deg, #fff1e5 0%, #ffe5ed 48%, #eaf5e8 100%);
-}
-
-body::before {
-  background-image:
-    radial-gradient(rgba(142, 94, 117, 0.14) 0.7px, transparent 0.7px),
-    linear-gradient(90deg, transparent 49.9%, rgba(255, 255, 255, 0.3) 50%, transparent 50.1%);
-  background-size: 8px 8px, 100% 100%;
-  opacity: 0.24;
 }
 
 .eyebrow {
@@ -762,18 +773,8 @@ h2 {
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(ellipse at 15% 12%, rgba(255, 255, 255, 0.96), transparent 38%),
-    radial-gradient(ellipse at 89% 82%, rgba(199, 230, 243, 0.44), transparent 36%),
-    #f0f1f2;
   color: var(--ink);
   font-family: "Trebuchet MS", "Segoe UI", sans-serif;
-}
-
-body::before {
-  background-image: radial-gradient(rgba(37, 42, 49, 0.11) 0.6px, transparent 0.6px);
-  background-size: 7px 7px;
-  opacity: 0.16;
 }
 
 .page-shell {
