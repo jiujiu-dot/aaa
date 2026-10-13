@@ -437,7 +437,7 @@ function showEndOverlay(result) {
   endOverlay.hidden = false;
   endOverlay.classList.remove("win", "lose");
   endOverlay.classList.add(result === "win" ? "win" : "lose");
-  endTitle.textContent = result === "win" ? "YOU WIN!" : "YOU LOSE";
+  endTitle.textContent = result === "win" ? "YOU WIN!" : "USAGI ATE U";
 }
 
 function hideEndOverlay() {
@@ -666,6 +666,7 @@ endLeave.onclick = resetToIdle;
 /* ===== draggable color panel ===== */
 let panelDrag = null;
 let panelRaf = null;
+let panelPointerId = null;
 let panelPointer = { x: 0, y: 0 };
 let panelOffset = { x: 0, y: 0 };
 
@@ -710,6 +711,18 @@ function schedulePanelFrame() {
 }
 
 function resetPanelPosition() {
+  if (panelRaf !== null) {
+    cancelAnimationFrame(panelRaf);
+    panelRaf = null;
+  }
+  if (panelPointerId !== null && panelHandle.hasPointerCapture(panelPointerId)) {
+    panelHandle.releasePointerCapture(panelPointerId);
+  }
+  panelDrag = null;
+  panelPointerId = null;
+  window.removeEventListener("pointermove", onPanelPointerMove);
+  window.removeEventListener("pointerup", onPanelPointerEnd);
+  window.removeEventListener("pointercancel", onPanelPointerEnd);
   panelOffset.x = 0;
   panelOffset.y = 0;
   colorPanel.style.transform = "";
@@ -771,6 +784,7 @@ function onPanelPointerEnd(event) {
   }
   clampPanel();
   panelDrag = null;
+  panelPointerId = null;
   colorPanel.classList.remove("dragging");
   document.body.classList.remove("dragging");
   window.removeEventListener("pointermove", onPanelPointerMove);
@@ -804,6 +818,7 @@ panelHandle.addEventListener("pointerdown", event => {
     minY: arenaRect.top - baseTop,
     maxY: arenaRect.bottom - rect.height - baseTop,
   };
+  panelPointerId = event.pointerId;
 
   colorPanel.classList.add("dragging");
   document.body.classList.add("dragging");

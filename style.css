@@ -1266,6 +1266,10 @@ main h1#page-title {
 /* ===== battle arena ===== */
 .battle-arena {
   position: relative;
+  --fighter-left: 24%;
+  --fighter-gap: 400px;
+  --fighter-size: 140px;
+  --enemy-fighter-size: 160px;
   width: 100%;
   height: clamp(580px, 78vh, 720px);
   overflow: hidden;
@@ -1298,18 +1302,19 @@ main h1#page-title {
 }
 
 .fighter-player {
-  left: 24%;
+  left: var(--fighter-left);
   z-index: 1;
 }
 
 .fighter-enemy {
-  right: 2%;
+  left: calc(var(--fighter-left) + var(--fighter-gap));
+  right: auto;
   z-index: 0;
 }
 
 .fighter-sprite {
-  width: 140px;
-  height: 140px;
+  width: var(--fighter-size);
+  height: var(--fighter-size);
   border-radius: 16px;
 }
 
@@ -1318,6 +1323,8 @@ main h1#page-title {
 }
 
 .fighter-enemy .fighter-sprite {
+  width: var(--enemy-fighter-size);
+  height: var(--enemy-fighter-size);
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center bottom;
@@ -1340,7 +1347,7 @@ main h1#page-title {
   position: absolute;
   left: 16px;
   bottom: 16px;
-  width: min(560px, calc(100% - 32px));
+  width: min(500px, calc(100% - 32px));
   background: rgba(255, 255, 255, 0.9);
   border-radius: 10px;
   box-shadow: none;
@@ -1348,15 +1355,15 @@ main h1#page-title {
 
 .color-panel .game-grid {
   grid-template-columns: 1fr 1fr;
-  padding: 14px;
+  padding: 12px;
 }
 
 .color-panel .specimen-stage {
-  height: 170px;
+  height: 155px;
 }
 
 .color-panel .controls {
-  padding: 0 0 0 16px;
+  padding: 0 0 0 14px;
 }
 
 @media (max-width: 800px) {
@@ -1929,7 +1936,7 @@ main h1#page-title {
   }
 
   .fighter-enemy {
-    bottom: 60px;
+    bottom: 150px;
   }
 
   .color-panel {
@@ -1969,7 +1976,7 @@ main h1#page-title {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 26px;
+  height: 24px;
   padding: 0 12px;
   border-bottom: 1px solid rgba(43, 50, 59, 0.1);
   border-radius: 10px 10px 0 0;
