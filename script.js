@@ -8,8 +8,6 @@ const ENEMY_PAUSE_MS = 1000;
 
 const ENEMIES = [
   { name: "Slime", hp: 8, min: 1, max: 2, color: "#6aa7f0", memorizeMs: 3000 },
-  { name: "Sprout", hp: 10, min: 1, max: 4, color: "#7fd400", memorizeMs: 2500 },
-  { name: "Boss Bloom", hp: 12, min: 2, max: 5, color: "#e8639f", memorizeMs: 2000 },
 ];
 
 const swatch = document.getElementById("swatch");
@@ -27,6 +25,7 @@ const endOverlay = document.getElementById("end-overlay");
 const endTitle = document.getElementById("end-title");
 const endPlayAgain = document.getElementById("end-play-again");
 const endLeave = document.getElementById("end-leave");
+const loseVideo = document.getElementById("lose-video");
 const battleArena = document.querySelector(".battle-arena");
 const dangerVignette = document.getElementById("danger-vignette");
 const roundLabel = document.getElementById("round-label");
@@ -433,6 +432,41 @@ function playAgain() {
   startFight();
 }
 
+let finishLoseVideo = null;
+
+function stopLoseVideo() {
+  if (!finishLoseVideo) return;
+  loseVideo.removeEventListener("ended", finishLoseVideo);
+  loseVideo.removeEventListener("error", finishLoseVideo);
+  finishLoseVideo = null;
+  loseVideo.pause();
+  loseVideo.currentTime = 0;
+  loseVideo.hidden = true;
+}
+
+function playLoseVideo(onDone) {
+  stopLoseVideo();
+  loseVideo.hidden = false;
+  loseVideo.currentTime = 0;
+
+  finishLoseVideo = () => {
+    loseVideo.removeEventListener("ended", finishLoseVideo);
+    loseVideo.removeEventListener("error", finishLoseVideo);
+    finishLoseVideo = null;
+    loseVideo.pause();
+    loseVideo.currentTime = 0;
+    loseVideo.hidden = true;
+    onDone();
+  };
+
+  loseVideo.addEventListener("ended", finishLoseVideo);
+  loseVideo.addEventListener("error", finishLoseVideo);
+  const played = loseVideo.play();
+  if (played && typeof played.catch === "function") {
+    played.catch(finishLoseVideo);
+  }
+}
+
 function showEndOverlay(result) {
   endOverlay.hidden = false;
   endOverlay.classList.remove("win", "lose");
@@ -441,6 +475,7 @@ function showEndOverlay(result) {
 }
 
 function hideEndOverlay() {
+  stopLoseVideo();
   endOverlay.hidden = true;
   endOverlay.classList.remove("win", "lose");
   endTitle.textContent = "";
@@ -493,7 +528,7 @@ function endGame(result, message) {
   button.onclick = null;
   if (result === "lose") {
     spawnItemDrop();
-    dropTimers.push(setTimeout(() => showEndOverlay(result), 1200));
+    dropTimers.push(setTimeout(() => playLoseVideo(() => showEndOverlay(result)), 1200));
   } else {
     showEndOverlay(result);
   }

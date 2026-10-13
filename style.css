@@ -1660,6 +1660,28 @@ main h1#page-title {
   color: #242b33;
 }
 
+/* ===== lose animation ===== */
+#lose-video {
+  position: absolute;
+  z-index: 80;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #14141e;
+  object-fit: contain;
+}
+
+#lose-video[hidden] {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  #lose-video {
+    position: fixed;
+  }
+}
+
 /* ===== danger vignette ===== */
 #danger-vignette {
   position: absolute;
